@@ -47,6 +47,54 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 
+# ---------------------------------------------------------------------------
+# Security policy
+#
+# These values are the gateway's policy. They live here, in backend Python,
+# and nowhere else: never in a system prompt, never in the frontend.
+# ---------------------------------------------------------------------------
+
+INTERNAL_DOMAIN = "limco.example"
+
+# What the support agent's role may reach. Folders are workspace folders.
+ROLE_SUPPORT_AGENT = "support_agent"
+
+ROLE_PERMISSIONS = {
+    ROLE_SUPPORT_AGENT: {
+        # Readable as part of the job.
+        "allowed": ("inbox", "customers", "product_docs"),
+        # Readable only when an administrator has granted HR access.
+        "hr_gated": ("hr",),
+        # Never readable, whatever the session's settings say.
+        "forbidden": ("it",),
+    }
+}
+
+# Outbound volume limits. A single message may carry at most this many
+# distinct personal items; a session may send at most this many to recipients
+# outside the company.
+MAX_PERSONAL_ITEMS_PER_MESSAGE = 5
+MAX_PERSONAL_ITEMS_PER_SESSION = 10
+
+# search_customers never returns more than this many rows.
+MAX_SEARCH_RESULTS = 20
+
+
+def role_permissions(role: str) -> dict:
+    """The folder permissions for a role.
+
+    An unknown role gets nothing: the default is to deny.
+    """
+    return ROLE_PERMISSIONS.get(
+        role, {"allowed": (), "hr_gated": (), "forbidden": ()}
+    )
+
+
+def is_internal_recipient(recipient: str) -> bool:
+    """True when an address belongs to the company itself."""
+    return recipient.strip().lower().endswith("@" + INTERNAL_DOMAIN)
+
+
 def has_claude_credentials() -> bool:
     """True when both an API key and a model id are configured."""
     return bool(ANTHROPIC_API_KEY) and bool(CLAUDE_MODEL)

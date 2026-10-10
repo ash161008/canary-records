@@ -1012,3 +1012,61 @@ def test_scan_prepares_the_text_only_once(seeded):
 
     assert result.confidence == detector.STRONG
     assert detector.PersonalItem("email", email) in result.personal
+
+
+# ---------------------------------------------------------------------------
+# A phone number with a digit stuck to it
+# ---------------------------------------------------------------------------
+
+
+def test_a_digit_before_a_spaced_phone_does_not_hide_it(seeded):
+    """Regression: a neighbouring digit used to defeat detection.
+
+    "ref 2" immediately before a spaced phone made the token nine digits
+    long, which is not a valid number, so a strict reading found nothing.
+    """
+    spaced = " ".join(seeded["customer_phone"].removeprefix("+65"))
+
+    assert detector.find_canaries(f"ref 2 {spaced}").confidence == detector.STRONG
+
+
+def test_a_digit_after_a_spaced_phone_does_not_hide_it(seeded):
+    spaced = " ".join(seeded["customer_phone"].removeprefix("+65"))
+
+    assert detector.find_canaries(f"{spaced} 7 end").confidence == detector.STRONG
+
+
+def test_leading_zeros_before_a_phone_do_not_hide_it(seeded):
+    digits = seeded["customer_phone"].removeprefix("+65")
+
+    assert detector.find_canaries(f"0000{digits}").confidence == detector.STRONG
+
+
+def test_a_phone_inside_a_longer_digit_run_is_found(seeded):
+    digits = seeded["customer_phone"].removeprefix("+65")
+
+    assert detector.find_canaries(f"txn 4471{digits}99").confidence == detector.STRONG
+
+
+def test_phone_variants_are_bounded(seeded):
+    """A long numeric blob is not expanded into candidate numbers."""
+    assert detector.phone_variants("9" * 25) == set()
+    assert detector.phone_variants("98231764") == {"98231764"}
+    assert "98231764" in detector.phone_variants("2 9 8 2 3 1 7 6 4")
+
+
+def test_personal_item_counting_still_uses_the_strict_reading(seeded):
+    """Windows are for matching a known value, not for inventing items.
+
+    Counting every window would inflate the outbound limits and hold
+    innocent messages.
+    """
+    items = detector.extract_personal("reference 1234567890123")
+
+    assert [item for item in items if item.kind == "phone"] == []
+
+
+def test_an_ordinary_long_number_is_not_a_canary(seeded):
+    assert detector.find_canaries("Invoice total 123456789012").confidence == (
+        detector.NONE
+    )

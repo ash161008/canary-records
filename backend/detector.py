@@ -85,7 +85,11 @@ NAME_MATCH_THRESHOLD = 90
 # `[\s.\-()]*` between digits) makes this pattern quadratic on long runs of
 # whitespace: a hostile 200 KB message took 86 seconds before the bounds were
 # added. Three separators is more than any real formatting needs.
-_PHONE_TOKEN = re.compile(r"(?:\+?[ ]{0,2}65[\s.\-()]{0,3})?(?:\d[\s.\-()]{0,3}){8,11}")
+#
+# The digit count runs to 24, not 11, so that a number padded or prefixed with
+# other digits is still captured as one token; ``phone_variants`` then picks
+# the plausible eight-digit numbers out of it.
+_PHONE_TOKEN = re.compile(r"(?:\+?[ ]{0,2}65[\s.\-()]{0,3})?(?:\d[\s.\-()]{0,3}){8,24}")
 
 # Bounded to the RFC maximums (64-character local part, 255-character domain)
 # for the same reason as the phone pattern: an unbounded leading `+` makes the
@@ -216,6 +220,42 @@ def canonicalise_phone(token: str) -> str | None:
     if len(digits) == 8 and digits[0] in "89":
         return digits
     return None
+
+
+# A phone-shaped token may absorb neighbouring digits: "ref 2" immediately
+# before "9 8 2 3 1 7 6 4" yields nine digits, which is not a valid number, so
+# a strict reading finds nothing and the number slips through. For *matching a
+# known value* every plausible eight-digit window inside the run is therefore
+# considered. Bounded, so a long numeric blob is not expanded.
+MAX_PHONE_RUN_DIGITS = 24
+
+
+def phone_variants(token: str) -> set[str]:
+    """Every eight-digit number a phone-shaped token could be expressing.
+
+    Used only to answer "is this *particular* known number present?", where a
+    spurious extra candidate costs nothing. Enumerating personal items uses
+    the strict reading in ``canonicalise_phone`` instead, because inventing
+    numbers there would inflate the outbound counts and hold innocent
+    messages.
+    """
+    digits = re.sub(r"\D", "", token or "")
+    if not digits or len(digits) > MAX_PHONE_RUN_DIGITS:
+        return set()
+
+    variants: set[str] = set()
+
+    exact = canonicalise_phone(digits)
+    if exact:
+        variants.add(exact)
+
+    if len(digits) > 8:
+        for start in range(len(digits) - 7):
+            window = digits[start : start + 8]
+            if window[0] in "89":
+                variants.add(window)
+
+    return variants
 
 
 def canonicalise_email(value: str) -> str:
@@ -377,9 +417,9 @@ class _TextIndex:
         self.phones = set()
         phone_spans: list[tuple[int, int]] = []
         for match in _PHONE_TOKEN.finditer(self.raw):
-            phone = canonicalise_phone(match.group(0))
-            if phone:
-                self.phones.add(phone)
+            variants = phone_variants(match.group(0))
+            if variants:
+                self.phones.update(variants)
                 phone_spans.append(match.span())
 
         # Postal codes are read from text with phone tokens masked out, so

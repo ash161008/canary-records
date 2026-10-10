@@ -25,13 +25,13 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 7 of 18 is complete**: the
+This repository is being built in stages. **Stage 8 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
-the decoy seeder, the detector, and the tamper-evident audit log. The gateway,
-the agents and the scenario suite are added in later stages, and the sections
-below will grow with them. Nothing in this README describes behaviour that does
-not yet run.
+the decoy seeder, the detector, the tamper-evident audit log, and the gateway
+itself. The agents, the admin controls and the scenario suite are added in
+later stages, and the sections below will grow with them. Nothing in this
+README describes behaviour that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -169,10 +169,11 @@ content. These evasions are **known gaps that it does not detect**:
   decoding is a denial-of-service surface, so the bound is the safer trade.
 - **Reversed or transposed text.** A value written backwards, or with its
   characters otherwise rearranged, is not matched.
-- **Identifiers split by spaces.** Phone numbers survive arbitrary spacing
-  because digits are canonicalised inside phone tokens, but an API key, staff
-  id or contract number **split by spaces** between its characters is not
-  matched; those are compared exactly, case-insensitively.
+- **Identifiers split by spaces.** Phone numbers survive arbitrary spacing,
+  and survive having other digits padded onto them, because every plausible
+  eight-digit number inside a digit run is considered. An API key, staff id or
+  contract number **split by spaces** between its characters is not matched;
+  those are compared exactly, case-insensitively.
 - **Content over the scan limit.** Only the first 200 KB is examined. The
   detector reports this as `truncated`, and the gateway fails closed on it:
   an oversized read result is withheld and an oversized outbound message is
