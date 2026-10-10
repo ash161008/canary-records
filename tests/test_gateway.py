@@ -450,7 +450,12 @@ def test_quarantine_writes_a_canary_read_event_with_ids_not_contents(world):
 
     assert event.resource == "workspace/customers/customer_contacts.csv"
     assert json.loads(event.canary_ids)
-    assert "@example" not in (event.reason or "")
+    # The reason must exist and must name the file without quoting it. An
+    # `or ""` guard here would let a missing reason pass vacuously.
+    assert event.reason
+    assert "customer_contacts.csv" in event.reason
+    assert "@example" not in event.reason
+    assert "+65" not in event.reason
 
 
 def test_customer_contacts_is_returned_in_monitor_mode(world):
@@ -1076,9 +1081,24 @@ def test_in_protect_mode_no_sent_row_ever_contains_a_strong_canary(world):
         f"{world['decoy_name']} {world['decoy_address']}",
     ]
 
+    # Without this, an empty strong_values list would make the scan below
+    # vacuous.
+    assert len(strong_values) >= 20
+
+    decisions = []
     for index, payload in enumerate(attempts):
         session = make_session(world, authorised=("partner@vendor-portal.test",))
-        send(session, "partner@vendor-portal.test", subject=f"batch {index}", body=payload)
+        result = send(
+            session, "partner@vendor-portal.test", subject=f"batch {index}", body=payload
+        )
+        decisions.append(result["decision"])
+
+    # Assert positively that every attempt was refused. The scan below runs
+    # over sent rows, and in protect mode there are none - so on its own it
+    # would pass even if the gateway had stopped recording sends altogether.
+    assert len(decisions) == len(attempts)
+    assert all(decision in ("blocked", "held") for decision in decisions), decisions
+    assert "allowed" not in decisions
 
     sent = database.list_simulated_emails(
         run_id=world["run_id"], delivery_status="simulated_sent"
@@ -1086,23 +1106,59 @@ def test_in_protect_mode_no_sent_row_ever_contains_a_strong_canary(world):
     approved = database.list_simulated_emails(
         run_id=world["run_id"], delivery_status="approved_sent"
     )
+    assert sent + approved == []
 
     for email in sent + approved:
         for value in strong_values:
             assert value not in email.body, f"{value} left in email {email.id}"
 
 
+def test_the_sent_row_scan_would_catch_a_leak_if_one_happened(world):
+    """Proves the invariant scan above is capable of failing.
+
+    In protect mode nothing is ever sent, so that test's scan loop has no rows
+    to walk. This runs the same scan against monitor mode, where the leak does
+    happen, so the scan itself is shown to detect one.
+    """
+    strong_values = [
+        value for canary in world["canaries"] for value in canary.strong_values()
+    ]
+    session = make_session(world, mode="monitor", authorised=("x@crm-switch.test",))
+
+    send(session, "x@crm-switch.test", subject="list", body=world["decoy_email"])
+
+    sent = database.list_simulated_emails(
+        run_id=world["run_id"], delivery_status="simulated_sent"
+    )
+    leaked = [
+        email.id
+        for email in sent
+        for value in strong_values
+        if value in email.body
+    ]
+
+    assert leaked, "the scan failed to spot a leak that definitely happened"
+
+
 def test_the_ai_never_receives_canary_content_in_protect_mode(world):
     """Every read of a file holding a decoy returns no content at all."""
-    session = make_session(world)
+    paths = (
+        "customers/customer_contacts.csv",
+        "product_docs/supplier_terms_2026.txt",
+    )
+    checked = 0
 
-    for path in ("customers/customer_contacts.csv", "product_docs/supplier_terms_2026.txt"):
+    for path in paths:
         fresh = make_session(world)
         result = gateway.execute(fresh.session_id, "read_file", {"path": path})
         assert result["allowed"] is False, path
+        assert result["decision"] == "quarantined", path
         assert "content" not in result, path
+        checked += 1
 
-    assert session is not None
+    # Guards the loop itself: a path tuple that silently stopped matching any
+    # seeded file would otherwise make this test pass without reading anything.
+    assert checked == len(paths)
 
 
 def test_every_call_writes_an_audit_event(world):
@@ -1144,3 +1200,118 @@ def test_results_always_report_hard_deny_explicitly(world):
         assert "hard_deny" in result
         assert isinstance(result["hard_deny"], bool)
         assert "decision" in result
+
+
+# ---------------------------------------------------------------------------
+# Rule 5 covers the whole message, and schemeless links
+# ---------------------------------------------------------------------------
+
+
+def test_rule_5_inspects_links_in_the_subject(world):
+    """A tracking link in the subject is no less a leak."""
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        subject=f"Track: http://track.test/?p={customer['phone'].removeprefix('+65')}",
+        body="Your order is on its way.",
+    )
+
+    assert result["decision"] == "held"
+    assert result["rule"] == "personal_data_in_url"
+
+
+def test_rule_5_inspects_an_external_link_in_the_subject(world):
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        subject="More at https://partner-portal.test/orders",
+        body=f"We have your number as {customer['phone']}.",
+    )
+
+    assert result["decision"] == "held"
+    assert result["rule"] == "external_link_with_personal_data"
+
+
+def test_rule_5_catches_a_schemeless_link_carrying_a_phone(world):
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        body=f"Track here: evil.test/leak?p={customer['phone'].removeprefix('+65')}",
+    )
+
+    assert result["decision"] == "held"
+    assert result["rule"] == "personal_data_in_url"
+
+
+def test_rule_5_catches_a_schemeless_external_host(world):
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        body=f"Your number is {customer['phone']}. See partner-portal.test/orders",
+    )
+
+    assert result["decision"] == "held"
+    assert result["rule"] == "external_link_with_personal_data"
+
+
+def test_a_schemeless_internal_host_is_not_held(world):
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        body=f"Your number is {customer['phone']}. See orders.limco.example/status",
+    )
+
+    assert result["allowed"] is True
+
+
+def test_a_decimal_number_with_a_slash_is_not_read_as_a_host(world):
+    """"rated 4.5/5" must not look like an external link."""
+    customer = world["customer_a"]
+    session = make_session(world, authorised=(customer["email"],))
+
+    result = send(
+        session,
+        customer["email"],
+        body=f"We have your number as {customer['phone']}. You rated us 4.5/5 - thank you.",
+    )
+
+    assert result["allowed"] is True
+
+
+def test_a_workspace_path_is_not_read_as_a_host(world):
+    session = make_session(world, authorised=("someone@example.com",))
+
+    result = send(
+        session,
+        "someone@example.com",
+        body="Our policy is in product_docs/refund_policy.txt internally.",
+    )
+
+    assert result["allowed"] is True
+
+
+def test_url_matching_stays_fast_on_a_hostile_message(world):
+    import time
+
+    session = make_session(world, authorised=("someone@example.com",))
+    payload = "a.b.c.d.e." * 15_000
+
+    started = time.monotonic()
+    send(session, "someone@example.com", body=payload)
+
+    assert time.monotonic() - started < 5

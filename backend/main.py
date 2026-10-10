@@ -16,8 +16,10 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, ConfigDict, Field
 
-from backend import __version__, audit, config, database, seeder
+from backend import __version__, audit, config, database, seeder, sessions
+from backend.models import AgentMode, ProtectionMode
 
 logging.basicConfig(
     level=logging.INFO,
@@ -97,7 +99,7 @@ def health() -> dict:
 # ---------------------------------------------------------------------------
 
 
-@app.post("/api/workspace/seed")
+@app.post("/api/workspace/seed", dependencies=[Depends(require_admin)])
 def seed_workspace() -> dict:
     """Plant the decoy records. Idempotent: seeding twice changes nothing."""
     try:
@@ -107,7 +109,7 @@ def seed_workspace() -> dict:
         raise HTTPException(status_code=500, detail="Seeding failed; see server log.")
 
 
-@app.post("/api/workspace/unseed")
+@app.post("/api/workspace/unseed", dependencies=[Depends(require_admin)])
 def unseed_workspace() -> dict:
     """Remove every planted decoy and restore the original files."""
     try:
@@ -119,17 +121,25 @@ def unseed_workspace() -> dict:
 
 @app.get("/api/workspace")
 def workspace_state() -> dict:
-    """Counts per location, and whether decoys are currently planted."""
+    """Counts per location, and whether decoys are currently planted.
+
+    Open, because it returns counts and nothing else: no personal data and no
+    record contents. The per-location breakdown of *which* files hold decoys
+    is removed here - that is the decoy map in miniature, and it belongs with
+    the rest of it behind the admin token on GET /api/canaries.
+    """
     try:
-        return seeder.summary()
+        state = seeder.summary()
     except Exception:
         logger.exception("reading workspace state failed")
         raise HTTPException(
             status_code=500, detail="Could not read the workspace; see server log."
         )
+    state.pop("canaries_per_location", None)
+    return state
 
 
-@app.get("/api/canaries")
+@app.get("/api/canaries", dependencies=[Depends(require_admin)])
 def list_canaries() -> dict:
     """The administrator's decoy map. Never exposed to an agent."""
     try:
@@ -154,7 +164,7 @@ def _resolve_run_id(run_id: str | None) -> str:
     return database.get_or_create_active_demo_run().run_id
 
 
-@app.get("/api/audit")
+@app.get("/api/audit", dependencies=[Depends(require_admin)])
 def get_audit(run_id: str | None = None, session_id: str | None = None) -> dict:
     """The audit log for one run, oldest first.
 
@@ -173,7 +183,15 @@ def get_audit(run_id: str | None = None, session_id: str | None = None) -> dict:
 
 @app.post("/api/audit/verify")
 def verify_audit(run_id: str | None = None) -> dict:
-    """Verify a run's chain, reporting the first entry that fails."""
+    """Verify a run's chain, reporting the first entry that fails.
+
+    Deliberately open. A log that only its administrator can verify is a
+    weaker guarantee than one anybody can check: the point of the chain is
+    that tampering is detectable by someone who does not have to be trusted.
+    Verification returns a validity flag, a count and an entry id - no
+    personal data, no references and no log contents - so reading the log
+    still needs the token even though checking it does not.
+    """
     resolved = _resolve_run_id(run_id)
     result = audit.verify_audit_chain(resolved)
     return {"run_id": resolved, **result}
@@ -207,3 +225,119 @@ app.mount(
     StaticFiles(directory=config.FRONTEND_DIR),
     name="static",
 )
+
+
+# ---------------------------------------------------------------------------
+# Sessions and administrator controls
+#
+# An agent never reaches any of this. Agents run in-process against
+# CanaryGateway.execute(); they make no HTTP request, see no admin endpoint
+# and never hold the admin token.
+# ---------------------------------------------------------------------------
+
+
+class CreateSessionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    agent_mode: AgentMode
+    protection_mode: ProtectionMode
+    inbox_id: str = Field(min_length=1, max_length=80)
+
+
+class HrAccessRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+
+
+def _session_error(error: Exception) -> HTTPException:
+    """Map a session error onto its status code.
+
+    An invalid transition is a 409: the request was well formed, the session
+    is simply not in a state where it makes sense.
+    """
+    if isinstance(error, sessions.InvalidTransition):
+        return HTTPException(status_code=409, detail=str(error))
+    if isinstance(error, sessions.ApprovalRefused):
+        return HTTPException(status_code=409, detail=str(error))
+    return HTTPException(status_code=404, detail=str(error))
+
+
+@app.post("/api/sessions")
+def create_session(request: CreateSessionRequest) -> dict:
+    """Start a session for one inbox item.
+
+    The protection mode is fixed here. To compare modes, create another
+    session.
+    """
+    try:
+        session = sessions.create_agent_session(
+            agent_mode=request.agent_mode,
+            protection_mode=request.protection_mode,
+            inbox_id=request.inbox_id,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+    except Exception:
+        logger.exception("creating a session failed")
+        raise HTTPException(
+            status_code=500, detail="Could not create the session; see server log."
+        )
+    return sessions.describe(session.session_id)
+
+
+@app.get("/api/sessions/{session_id}")
+def get_session(session_id: str) -> dict:
+    try:
+        return sessions.describe(session_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+
+
+@app.post("/api/sessions/{session_id}/stop", dependencies=[Depends(require_admin)])
+def stop_session(session_id: str) -> dict:
+    try:
+        return sessions.stop(session_id)
+    except (sessions.SessionError, ValueError) as error:
+        raise _session_error(error)
+
+
+@app.post("/api/sessions/{session_id}/continue", dependencies=[Depends(require_admin)])
+def continue_session(session_id: str) -> dict:
+    """Resume a paused session without releasing the withheld content."""
+    try:
+        return sessions.resume(session_id)
+    except (sessions.SessionError, ValueError) as error:
+        raise _session_error(error)
+
+
+@app.post("/api/sessions/{session_id}/hr-access", dependencies=[Depends(require_admin)])
+def set_session_hr_access(session_id: str, request: HrAccessRequest) -> dict:
+    try:
+        return sessions.set_hr_access(session_id, request.enabled)
+    except (sessions.SessionError, ValueError) as error:
+        raise _session_error(error)
+
+
+@app.get("/api/emails/held", dependencies=[Depends(require_admin)])
+def get_held_emails(run_id: str | None = None) -> dict:
+    """Messages waiting for review, with whether each may be approved."""
+    held = sessions.list_held(run_id=run_id)
+    return {"count": len(held), "emails": held}
+
+
+@app.post("/api/emails/{email_id}/approve", dependencies=[Depends(require_admin)])
+def approve_email(email_id: int) -> dict:
+    """Approve a held message. The gateway revalidates it first."""
+    try:
+        return sessions.approve_email(email_id)
+    except (sessions.SessionError, ValueError) as error:
+        raise _session_error(error)
+
+
+@app.post("/api/emails/{email_id}/deny", dependencies=[Depends(require_admin)])
+def deny_email(email_id: int) -> dict:
+    try:
+        return sessions.deny_email(email_id)
+    except (sessions.SessionError, ValueError) as error:
+        raise _session_error(error)

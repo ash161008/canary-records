@@ -216,9 +216,14 @@ def test_decoy_emails_and_phones_do_not_collide_with_real_ones(clean_workspace):
 
     seeder.seed()
 
-    for canary in seeder.list_registered_canaries():
-        if canary.canary_type != "customer":
-            continue
+    customer_decoys = [
+        canary
+        for canary in seeder.list_registered_canaries()
+        if canary.canary_type == "customer"
+    ]
+    assert len(customer_decoys) == seeder.CUSTOMER_DECOY_COUNT
+
+    for canary in customer_decoys:
         email, phone, customer_id = canary.strong_values()
         assert email not in real_emails
         assert phone not in real_phones
@@ -257,7 +262,10 @@ def test_every_canary_value_is_present_in_the_files_it_references(clean_workspac
     """
     seeder.seed()
 
-    for canary in seeder.list_registered_canaries():
+    canaries = seeder.list_registered_canaries()
+    assert len(canaries) == seeder.TOTAL_DECOY_COUNT
+
+    for canary in canaries:
         referenced = re.findall(
             r"workspace/[\w/]+\.\w+", f"{canary.location} {canary.record_ref}"
         )
@@ -287,9 +295,14 @@ def test_salary_decoys_are_in_both_hr_files(clean_workspace):
     employees = read_text(seeder.EMPLOYEES_CSV)
     salaries = read_text(seeder.SALARIES_CSV)
 
-    for canary in seeder.list_registered_canaries():
-        if canary.canary_type != "salary":
-            continue
+    salary_decoys = [
+        canary
+        for canary in seeder.list_registered_canaries()
+        if canary.canary_type == "salary"
+    ]
+    assert len(salary_decoys) == seeder.SALARY_DECOY_COUNT
+
+    for canary in salary_decoys:
         staff_id, email = canary.strong_values()
         assert staff_id in employees
         assert staff_id in salaries
@@ -378,9 +391,14 @@ def test_record_refs_point_at_the_right_rows(clean_workspace):
     seeder.seed()
     rows = read_csv(seeder.CUSTOMERS_CSV)
 
-    for canary in seeder.list_registered_canaries():
-        if canary.canary_type != "customer":
-            continue
+    customer_decoys = [
+        canary
+        for canary in seeder.list_registered_canaries()
+        if canary.canary_type == "customer"
+    ]
+    assert len(customer_decoys) == seeder.CUSTOMER_DECOY_COUNT
+
+    for canary in customer_decoys:
         row_number = int(canary.record_ref.removeprefix("row "))
         email = canary.strong_values()[0]
         assert rows[row_number - 1]["email"] == email
@@ -460,6 +478,9 @@ def test_decoy_staff_sit_with_real_staff_in_the_same_position(clean_workspace):
         if canary.canary_type == "salary"
     }
 
+    assert len(decoy_ids) == seeder.SALARY_DECOY_COUNT
+    checked = 0
+
     for index, row in enumerate(rows):
         if row["staff_id"] not in decoy_ids:
             continue
@@ -469,6 +490,9 @@ def test_decoy_staff_sit_with_real_staff_in_the_same_position(clean_workspace):
             if 0 <= neighbour < len(rows)
         ]
         assert row["position"] in neighbours, row
+        checked += 1
+
+    assert checked == seeder.SALARY_DECOY_COUNT
 
 
 def test_decoy_salaries_are_in_the_same_band_as_the_position(clean_workspace):
@@ -486,6 +510,9 @@ def test_decoy_salaries_are_in_the_same_band_as_the_position(clean_workspace):
         position = employees[row["staff_id"]]["position"]
         by_position.setdefault(position, []).append(int(row["monthly_salary"]))
 
+    assert len(decoy_ids) == seeder.SALARY_DECOY_COUNT
+    checked = 0
+
     for row in salaries:
         if row["staff_id"] not in decoy_ids:
             continue
@@ -493,14 +520,23 @@ def test_decoy_salaries_are_in_the_same_band_as_the_position(clean_workspace):
         peers = by_position[position]
         assert 2500 <= int(row["monthly_salary"]) <= 12000
         assert min(peers) <= int(row["monthly_salary"]) <= max(peers)
+        checked += 1
+
+    assert checked == seeder.SALARY_DECOY_COUNT
 
 
 def test_decoy_staff_ids_follow_the_real_format(clean_workspace):
     seeder.seed()
 
-    for canary in seeder.list_registered_canaries():
-        if canary.canary_type == "salary":
-            assert re.fullmatch(r"LC-\d{4}", canary.strong_values()[0])
+    salary_decoys = [
+        canary
+        for canary in seeder.list_registered_canaries()
+        if canary.canary_type == "salary"
+    ]
+    assert len(salary_decoys) == seeder.SALARY_DECOY_COUNT
+
+    for canary in salary_decoys:
+        assert re.fullmatch(r"LC-\d{4}", canary.strong_values()[0])
 
 
 def test_decoy_orders_are_not_all_at_the_highest_numbers(clean_workspace):
@@ -576,17 +612,26 @@ def test_the_registry_is_unreachable_through_workspace_path_utilities(clean_work
 def test_no_workspace_file_contains_a_registry_path(clean_workspace):
     seeder.seed()
 
-    for path in sorted(config.WORKSPACE_DIR.rglob("*")):
-        if path.is_file() and path.name != ".gitkeep":
-            text = path.read_text(encoding="utf-8", errors="replace")
-            assert "registry.db" not in text
-            assert "vault/" not in text
+    files = [
+        path
+        for path in sorted(config.WORKSPACE_DIR.rglob("*"))
+        if path.is_file() and path.name != ".gitkeep"
+    ]
+    assert len(files) >= 12
+
+    for path in files:
+        text = path.read_text(encoding="utf-8", errors="replace")
+        assert "registry.db" not in text
+        assert "vault/" not in text
 
 
 def test_listing_the_workspace_never_shows_the_registry(clean_workspace):
     seeder.seed()
 
-    for folder in workspace.list_folders():
+    folders = workspace.list_folders()
+    assert len(folders) == 5
+
+    for folder in folders:
         assert "registry.db" not in workspace.list_folder(folder)
 
 

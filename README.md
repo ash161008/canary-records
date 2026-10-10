@@ -25,13 +25,13 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 8 of 18 is complete**: the
+This repository is being built in stages. **Stage 9 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
-the decoy seeder, the detector, the tamper-evident audit log, and the gateway
-itself. The agents, the admin controls and the scenario suite are added in
-later stages, and the sections below will grow with them. Nothing in this
-README describes behaviour that does not yet run.
+the decoy seeder, the detector, the tamper-evident audit log, the gateway
+itself, and sessions with their administrator controls. The agents and the
+scenario suite are added in later stages, and the sections below will grow
+with them. Nothing in this README describes behaviour that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -83,18 +83,45 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `GET` | `/` | The five-screen frontend. |
 | `POST` | `/api/workspace/seed` | Plant the 20 decoys. Idempotent. Admin. |
 | `POST` | `/api/workspace/unseed` | Remove every decoy and restore the originals. Admin. |
-| `GET` | `/api/workspace` | Record and file counts per location. |
+| `GET` | `/api/workspace` | Record and file counts per location. Open. |
 | `GET` | `/api/canaries` | The administrator's decoy map. Admin. |
-| `GET` | `/api/audit` | The audit log for a run, oldest first. |
-| `POST` | `/api/audit/verify` | Verify a run's chain; names the first broken entry. |
+| `GET` | `/api/audit` | The audit log for a run, oldest first. Admin. |
+| `POST` | `/api/audit/verify` | Verify a run's chain; names the first broken entry. Open. |
 | `POST` | `/api/audit/tamper` | Edit the oldest entry, to demonstrate detection. Admin, `DEMO_MODE=1` only. |
+| `POST` | `/api/sessions` | Start a session for one inbox item. Fixes its protection mode. |
+| `GET` | `/api/sessions/{id}` | A session's state. |
+| `POST` | `/api/sessions/{id}/stop` | Terminate a session, clearing pending state. Admin. |
+| `POST` | `/api/sessions/{id}/continue` | Resume a paused session **without** releasing withheld content. Admin. |
+| `POST` | `/api/sessions/{id}/hr-access` | Grant or remove HR access. Admin. |
+| `GET` | `/api/emails/held` | Messages waiting for review. Admin. |
+| `POST` | `/api/emails/{id}/approve` | Approve a held message; the gateway revalidates first. Admin. |
+| `POST` | `/api/emails/{id}/deny` | Deny a held message. Admin. |
 
-Admin endpoints are not agent tools: they are absent from the gateway's tool
-list, so no agent can reach seeding, the decoy map or the audit controls
-however it is prompted. `POST /api/audit/tamper` already requires the
-`X-Admin-Token` header, compared with `secrets.compare_digest`; it fails closed
-with 503 if `ADMIN_TOKEN` is unset on the server. Stage 9 applies the same
-requirement to the remaining admin endpoints.
+Every admin endpoint requires the `X-Admin-Token` header, compared with
+`secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
+on the server. Open endpoints are `/api/health`, `/`, the static assets,
+`POST /api/sessions`, `GET /api/sessions/{id}`, `GET /api/workspace` (counts
+only) and `POST /api/audit/verify`. The server binds to loopback only.
+
+Admin endpoints are also not agent tools. An agent never makes an HTTP request
+at all: it runs in-process against `CanaryGateway.execute()`, so it cannot see
+an admin endpoint, cannot hold the token, and cannot reach seeding, the decoy
+map, the audit controls or the approval queue however it is prompted.
+
+`GET /api/audit` requires the token, because the log holds references that are
+linkable to a person — it is admin data in its own right, as set out above.
+**Chain verification is deliberately open**, though: a log only its own
+administrator can verify is a weaker guarantee than one anyone can check, and
+`POST /api/audit/verify` returns a validity flag, an entry count and an entry
+id — no personal data, no references and no log contents.
+
+**Approval is not an override.** Approving a held message re-runs the entire
+outbound policy over exactly the stored recipient, subject and body. The
+administrator's approval satisfies only the *review* requirement that caused
+the hold; any rule that hard-denies still hard-denies, so a decoy that has
+appeared since, or a session total that has since been exceeded, blocks the
+message and refuses the approval. A message that was blocked outright can
+never be approved, by anyone, in any mode.
 
 ## Project layout
 
@@ -132,7 +159,9 @@ Every gateway decision and administrator action is appended to a hash-chained
 log, one chain per demo run. Each entry's SHA-256 fingerprint covers its own
 fields plus the previous entry's fingerprint, so editing a stored value
 invalidates that entry and every entry after it, and `POST /api/audit/verify`
-reports exactly which entry broke and why.
+reports exactly which entry broke and why. That endpoint needs no
+administrator token: tampering should be detectable by someone who does not
+have to be trusted.
 
 **This is not a blockchain.** There is no network, no consensus and no
 distribution; it is a local hash chain. Its guarantee is correspondingly
@@ -183,6 +212,30 @@ A `NONE` result means no registered decoy was found in what was scanned. It
 never means the content is safe — the role checks, the data-owner rule, the
 personal-item limits and the taint rule all still apply, and they do not depend
 on detection succeeding.
+
+### Where authorisation comes from, and its limitation
+
+The data-owner rule asks whether the owner of a piece of personal data is an
+authorised recipient of **this task**. That list is set by the backend from the
+inbox item when the session is created — the customer's email address on file,
+or the internal staff addresses the task legitimately involves — and never from
+anything the AI says.
+
+The rule is deliberately strict, and applies to internal recipients too:
+emailing a customer's phone number to a colleague at `limco.example` is held
+for review unless that customer is an authorised recipient of the task. A
+colleague being inside the company is not by itself a reason they are entitled
+to a particular customer's details.
+
+**The limitation is where that list comes from.** In this prototype each task
+carries its own authorised recipients, defined per scenario. A production
+system would not invent them per task: it would read entitlement from the
+company's own access control — the CRM's record ownership, the helpdesk ticket's
+assignment, the staff directory and group membership — so that "is this person
+entitled to this record?" is answered by the system of record rather than by a
+field attached to the request. As built, a task context that is set wrongly
+either holds legitimate work or authorises a recipient who should not be
+authorised, and nothing in the gateway can tell the difference.
 
 ### Databases
 

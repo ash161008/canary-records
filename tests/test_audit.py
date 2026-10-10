@@ -1,6 +1,8 @@
 """Stage 7 checks: the tamper-evident audit chain.
 
-One behaviour per test.
+One behaviour per test. The audit endpoints require the administrator token
+from Stage 9 onwards: the log holds references that are linkable to a person,
+so it is admin data in its own right.
 """
 
 import importlib
@@ -319,7 +321,7 @@ def test_get_audit_returns_the_current_runs_events(client):
     run = database.get_or_create_active_demo_run()
     append(run.run_id, event_type="A", resource="workspace/customers/orders.json")
 
-    response = client.get("/api/audit")
+    response = client.get("/api/audit", headers=admin())
 
     assert response.status_code == 200
     body = response.json()
@@ -332,7 +334,9 @@ def test_get_audit_accepts_a_run_id(client):
     other = database.create_demo_run()
     append(other.run_id, event_type="A")
 
-    response = client.get("/api/audit", params={"run_id": other.run_id})
+    response = client.get(
+        "/api/audit", params={"run_id": other.run_id}, headers=admin()
+    )
 
     assert response.json()["count"] == 1
 

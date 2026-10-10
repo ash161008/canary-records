@@ -33,27 +33,40 @@ NRIC_PATTERN = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]\d{7}[A-Za-z](?![A-Za-z0-9])
 CUSTOMER_DOMAINS = ("example.com", "example.net", "example.org")
 
 
+def _non_empty(rows, what):
+    """Guard every fixture against being empty.
+
+    Many tests below assert a property of every row. If a file were empty or
+    unparsable those loops would have nothing to walk, and the tests would
+    pass without checking anything.
+    """
+    assert rows, f"{what} is empty, so the tests over it would prove nothing"
+    return rows
+
+
 @pytest.fixture(scope="module")
 def customers():
     with CUSTOMERS_CSV.open(newline="", encoding="utf-8") as handle:
-        return list(csv.DictReader(handle))
+        return _non_empty(list(csv.DictReader(handle)), "customer_contacts.csv")
 
 
 @pytest.fixture(scope="module")
 def orders():
-    return json.loads(ORDERS_JSON.read_text(encoding="utf-8"))
+    return _non_empty(
+        json.loads(ORDERS_JSON.read_text(encoding="utf-8")), "orders.json"
+    )
 
 
 @pytest.fixture(scope="module")
 def employees():
     with EMPLOYEES_CSV.open(newline="", encoding="utf-8") as handle:
-        return list(csv.DictReader(handle))
+        return _non_empty(list(csv.DictReader(handle)), "employees.csv")
 
 
 @pytest.fixture(scope="module")
 def salaries():
     with SALARIES_CSV.open(newline="", encoding="utf-8") as handle:
-        return list(csv.DictReader(handle))
+        return _non_empty(list(csv.DictReader(handle)), "salaries.csv")
 
 
 def workspace_files():

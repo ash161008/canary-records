@@ -84,7 +84,20 @@ DENIED = "denied"
 WITHHELD_MESSAGE = "That content was withheld by security policy."
 
 _EMAIL_ADDRESS = re.compile(r"^[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]{1,255}\.[A-Za-z]{2,24}$")
-_URL = re.compile(r"(?:https?://|www\.)[^\s<>\"')]{1,2000}", re.IGNORECASE)
+
+# Links, in three shapes: with a scheme, starting "www.", and schemeless -
+# a dotted domain followed directly by a path or a query, as in
+# "evil.test/leak?p=98231764". The schemeless form requires an alphabetic
+# top-level label so that "rated 4.5/5" is not read as a host, and every
+# quantifier is bounded so a hostile message cannot make matching expensive.
+_URL = re.compile(
+    r"(?:https?://|www\.)[^\s<>\"')]{1,2000}"
+    r"|(?<![A-Za-z0-9.@\-])"
+    r"(?:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\.){1,5}"
+    r"[A-Za-z]{2,24}"
+    r"[/?][^\s<>\"')]{0,2000}",
+    re.IGNORECASE,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -479,13 +492,14 @@ def _disclosed_personal(
 
 
 def _outbound_verdict(
-    session: AgentSession, scan: detector.ScanResult, recipient: str, body_text: str
+    session: AgentSession, scan: detector.ScanResult, recipient: str, message_text: str
 ) -> _Verdict:
     """Apply the outbound rules in order and return the first that fires.
 
-    The scan already covers the recipient, the subject and the body, including
-    every URL with its host and query string, because they were scanned as one
-    piece of text.
+    ``message_text`` is the whole message - recipient, subject and body - the
+    same text the scan covered. Rule 5 reads links out of all of it, not just
+    the body: a tracking link carrying a phone number is no less a leak for
+    being in the subject line.
     """
     recipient_address = recipient.strip().lower()
     authorised = _authorised_recipients(session)
@@ -603,7 +617,7 @@ def _outbound_verdict(
 
     # Rule 5. Personal data inside a link, or a link to an outside host in a
     # message that carries personal data.
-    urls = _urls_in(body_text)
+    urls = _urls_in(message_text)
     for url in urls:
         if detector.extract_personal(url):
             return _Verdict(
@@ -1001,7 +1015,7 @@ def _execute_send_email(
     message_text = f"{recipient}\n{args.subject}\n{args.body}"
     scan = detector.scan(message_text)
 
-    verdict = _outbound_verdict(session, scan, recipient, args.body)
+    verdict = _outbound_verdict(session, scan, recipient, message_text)
 
     if not _mode_enforces_outbound(session.protection_mode):
         # Monitor mode: log what would have happened, then let it through so
@@ -1024,3 +1038,127 @@ def _execute_send_email(
     return _apply_outbound(
         session, run_id, verdict, recipient, args.subject, args.body
     )
+
+
+# ---------------------------------------------------------------------------
+# Revalidating a held message
+# ---------------------------------------------------------------------------
+
+
+def revalidate_held_email(email_id: int) -> dict:
+    """Re-run the whole outbound policy on exactly the stored message.
+
+    Called when an administrator approves a held message. Approval is not an
+    override: the policy runs again from scratch over the same recipient,
+    subject and body, and only the HOLD rules are treated as satisfied by the
+    review having happened. A rule that hard-denies still hard-denies, so a
+    decoy that appeared since the message was held, or a session total that
+    has since been exceeded, blocks it.
+
+    A blocked message never reaches this function; ``sessions.approve_email``
+    refuses it first, and the guard below refuses it again.
+    """
+    email = database.get_simulated_email(email_id)
+    if email is None:
+        raise ValueError(f"No such message: {email_id!r}")
+
+    if email.hard_deny or email.delivery_status == "blocked":
+        return {
+            "email_id": email_id,
+            "delivery_status": email.delivery_status,
+            "approved": False,
+            "hard_deny": True,
+            "rule": email.rule,
+            "reason": (
+                "This message was blocked outright. A hard deny can never be "
+                "approved."
+            ),
+        }
+
+    session = database.get_session(email.session_id) if email.session_id else None
+    if session is None:
+        return {
+            "email_id": email_id,
+            "delivery_status": email.delivery_status,
+            "approved": False,
+            "hard_deny": True,
+            "rule": "invalid_session",
+            "reason": "The session this message belongs to no longer exists.",
+        }
+
+    # The session may since have been stopped. That does not block an
+    # administrator reviewing a message it already produced: this is an admin
+    # action on a stored record, not a new request from the agent.
+    message_text = f"{email.recipient}\n{email.subject}\n{email.body}"
+    scan = detector.scan(message_text)
+    verdict = _outbound_verdict(session, scan, email.recipient, message_text)
+
+    if verdict.hard_deny:
+        database.update_email_status(email_id, "blocked", rule=verdict.rule)
+        audit.append_audit_event(
+            run_id=email.run_id,
+            session_id=email.session_id,
+            event_type="EXFILTRATION_BLOCKED",
+            tool=SEND_EMAIL,
+            resource=email.recipient,
+            decision=BLOCKED,
+            rule=verdict.rule,
+            reason=(
+                "An administrator tried to approve this message; revalidation "
+                f"refused it. {verdict.reason}"
+            ),
+            canary_ids=verdict.canary_ids,
+        )
+        database.create_alert(
+            run_id=email.run_id,
+            session_id=email.session_id,
+            severity="critical",
+            title="An approval was refused",
+            message=(
+                f"An administrator approved a held message to {email.recipient}, "
+                "but rechecking it found something that can never be sent. "
+                "Nothing was sent."
+            ),
+            canary_ids=json.dumps(sorted(verdict.canary_ids)) if verdict.canary_ids else None,
+        )
+        return {
+            "email_id": email_id,
+            "delivery_status": "blocked",
+            "approved": False,
+            "hard_deny": True,
+            "rule": verdict.rule,
+            "reason": verdict.reason,
+        }
+
+    # Either no rule fires any more, or only review-requiring rules do, and
+    # the review has now happened.
+    database.update_email_status(
+        email_id, "approved_sent", rule=f"admin_approved:{verdict.rule}"
+    )
+    if not config.is_internal_recipient(email.recipient) and verdict.personal_count:
+        database.add_personal_items_sent(email.session_id, verdict.personal_count)
+
+    audit.append_audit_event(
+        run_id=email.run_id,
+        session_id=email.session_id,
+        event_type="EMAIL_APPROVED_SENT",
+        tool=SEND_EMAIL,
+        resource=email.recipient,
+        decision=ALLOWED,
+        rule=f"admin_approved:{verdict.rule}",
+        reason=(
+            "An administrator approved this message and revalidation passed. "
+            "It was recorded as sent; no real email was sent."
+        ),
+    )
+    return {
+        "email_id": email_id,
+        "delivery_status": "approved_sent",
+        "approved": True,
+        "hard_deny": False,
+        "rule": f"admin_approved:{verdict.rule}",
+        "reason": (
+            "The message was revalidated and recorded as sent. No real email "
+            "was sent."
+        ),
+    }
