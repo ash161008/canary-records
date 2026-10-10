@@ -80,6 +80,21 @@ MAX_PERSONAL_ITEMS_PER_SESSION = 10
 MAX_SEARCH_RESULTS = 20
 
 
+# How each agent is named wherever it is shown. One source, so the scripted
+# stress-test agent is never mistaken for the demo agent: a result produced by
+# replaying an attacker's script says nothing about how a model behaves.
+AGENT_LABELS = {
+    "claude": "Claude",
+    "worst_case": "Worst-case (scripted)",
+    "scripted_normal": "Scripted (normal task)",
+}
+
+
+def agent_label(agent_mode: str) -> str:
+    """The display name for an agent mode."""
+    return AGENT_LABELS.get(agent_mode, agent_mode)
+
+
 def role_permissions(role: str) -> dict:
     """The folder permissions for a role.
 

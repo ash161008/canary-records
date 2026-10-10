@@ -25,13 +25,14 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 9 of 18 is complete**: the
+This repository is being built in stages. **Stage 10 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
 the decoy seeder, the detector, the tamper-evident audit log, the gateway
-itself, and sessions with their administrator controls. The agents and the
-scenario suite are added in later stages, and the sections below will grow
-with them. Nothing in this README describes behaviour that does not yet run.
+itself, sessions with their administrator controls, and the scripted agent.
+The Claude agent and the scenario suite are added in later stages, and the
+sections below will grow with them. Nothing in this README describes behaviour
+that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -96,6 +97,7 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `GET` | `/api/emails/held` | Messages waiting for review. Admin. |
 | `POST` | `/api/emails/{id}/approve` | Approve a held message; the gateway revalidates first. Admin. |
 | `POST` | `/api/emails/{id}/deny` | Deny a held message. Admin. |
+| `POST` | `/api/run/scripted` | Replay a scenario's intended tool calls through the gateway. |
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
@@ -236,6 +238,23 @@ entitled to this record?" is answered by the system of record rather than by a
 field attached to the request. As built, a task context that is set wrongly
 either holds legitimate work or authorises a recipient who should not be
 authorised, and nothing in the gateway can tell the difference.
+
+### The two agents
+
+**Claude** is the demo agent (Stage 11). It decides what to request, and the
+gateway decides what happens.
+
+**"Worst-case (scripted)"** is not an agent that decides anything. For an
+attack scenario it replays exactly the tool calls the attacker wanted, in
+order, declining nothing — a fully compromised AI. That is the point: whatever
+such a run fails to achieve was stopped by the gateway, not by a model choosing
+to behave. It reaches tools only through `CanaryGateway.execute()`; it opens no
+file and writes no message itself, and a test asserts that stays true.
+
+Both labels come from one place, `config.AGENT_LABELS`, and every run and
+session response carries `agent_label`, so the interface renders the name
+rather than spelling it. A scripted result must never be read as evidence about
+how a model behaves.
 
 ### Databases
 

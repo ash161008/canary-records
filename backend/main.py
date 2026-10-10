@@ -18,7 +18,16 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend import __version__, audit, config, database, seeder, sessions
+from backend import (
+    __version__,
+    agent_scripted,
+    audit,
+    config,
+    database,
+    scenarios,
+    seeder,
+    sessions,
+)
 from backend.models import AgentMode, ProtectionMode
 
 logging.basicConfig(
@@ -341,3 +350,38 @@ def deny_email(email_id: int) -> dict:
         return sessions.deny_email(email_id)
     except (sessions.SessionError, ValueError) as error:
         raise _session_error(error)
+
+
+# ---------------------------------------------------------------------------
+# Agent runs
+# ---------------------------------------------------------------------------
+
+
+class RunScriptedRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    scenario_id: str = Field(min_length=1, max_length=40)
+    protection_mode: ProtectionMode
+
+
+@app.post("/api/run/scripted")
+def run_scripted(request: RunScriptedRequest) -> dict:
+    """Replay a scenario's intended tool calls through the gateway.
+
+    This is the worst-case agent, labelled "Worst-case (scripted)" wherever it
+    is shown. It is not the demo agent: it replays an attacker's script with
+    no judgement of its own, so whatever the run fails to achieve was stopped
+    by the gateway rather than declined by a model.
+    """
+    try:
+        return agent_scripted.run_scenario(
+            scenario_id=request.scenario_id,
+            protection_mode=request.protection_mode,
+        )
+    except scenarios.ScenarioError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+    except Exception:
+        logger.exception("scripted run failed")
+        raise HTTPException(
+            status_code=500, detail="The scripted run failed; see server log."
+        )

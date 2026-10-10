@@ -201,6 +201,7 @@ def describe(session_id: str) -> dict:
         "session_id": session.session_id,
         "run_id": session.run_id,
         "agent_mode": session.agent_mode,
+        "agent_label": config.agent_label(session.agent_mode),
         "protection_mode": session.protection_mode,
         "role": session.role,
         "hr_access": bool(session.hr_access),
