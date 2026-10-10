@@ -1,0 +1,10 @@
+.env
+data/*.db
+vault/*.db
+__pycache__/
+
+# Local tooling
+.venv/
+.pytest_cache/
+*.pyc
+.DS_Store

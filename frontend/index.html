@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canary Records</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Canary&nbsp;Records</span>
+    <span class="brand-sub">Safe AI agent environments for confidential data</span>
+  </div>
+  <div class="topbar-right">
+    <span class="synthetic-flag">Synthetic demo data</span>
+    <span id="health-indicator" class="health" data-state="unknown">
+      <span class="health-dot" aria-hidden="true"></span>
+      <span id="health-text">Checking backend…</span>
+    </span>
+  </div>
+</header>
+
+<nav class="screennav" aria-label="Demo screens">
+  <button class="navbtn" data-screen="problem" aria-current="page">
+    <span class="navnum">1</span> Problem
+  </button>
+  <button class="navbtn" data-screen="seed">
+    <span class="navnum">2</span> Seed workspace
+  </button>
+  <button class="navbtn" data-screen="run">
+    <span class="navnum">3</span> Live agent run
+  </button>
+  <button class="navbtn" data-screen="audit">
+    <span class="navnum">4</span> Audit &amp; admin
+  </button>
+  <button class="navbtn" data-screen="scoreboard">
+    <span class="navnum">5</span> Scoreboard
+  </button>
+</nav>
+
+<main id="main">
+
+  <!-- Screen 1 -->
+  <section class="screen is-active" id="screen-problem" aria-labelledby="h-problem">
+    <h1 id="h-problem">An AI agent with access to everything is one instruction away from a breach</h1>
+    <p class="lede">
+      Lim &amp; Co Trading is a small Singapore retailer. They want an AI assistant to
+      answer customer email, so they give it the files it needs: customer contacts,
+      orders, HR records, internal notes. One hidden instruction inside an incoming
+      email, and that assistant becomes the fastest data-exfiltration tool the company
+      ever installed.
+    </p>
+
+    <div class="cards">
+      <article class="card">
+        <h2>The decoys</h2>
+        <p>
+          Canary Records plants realistic decoy records throughout the company's data.
+          They read like ordinary customers, staff and supplier contracts. Nothing in
+          the data marks them; the only list of them lives in a registry the agent and
+          its tools can never read.
+        </p>
+      </article>
+      <article class="card">
+        <h2>The gateway</h2>
+        <p>
+          The agent may <em>request</em> a file, a lookup or an email. It can never
+          perform one. Every request is executed by a single backend method, which
+          checks the role first, scans the result for decoys before the AI sees it, and
+          inspects every outgoing message before it leaves the company.
+        </p>
+      </article>
+      <article class="card">
+        <h2>The evidence</h2>
+        <p>
+          Every decision is written to a hash-chained audit log, so a changed entry is
+          detectable. The scoreboard reports what happened across the full scenario
+          suite, measured from runs that actually executed.
+        </p>
+      </article>
+    </div>
+
+    <blockquote class="principle">
+      The AI may request actions, but only <code>CanaryGateway.execute()</code> has
+      authority to perform them.
+    </blockquote>
+
+    <div class="actions">
+      <button class="btn btn-primary" data-goto="seed">Open Lim &amp; Co's workspace</button>
+    </div>
+  </section>
+
+  <!-- Screen 2 -->
+  <section class="screen" id="screen-seed" aria-labelledby="h-seed">
+    <h1 id="h-seed">Seed the workspace</h1>
+    <p class="lede">
+      Plant the decoy records into Lim &amp; Co's synthetic files, then review the
+      administrator's decoy map. This map is visible on this screen only, and never to
+      the agent.
+    </p>
+    <div class="panel" id="seed-panel">
+      <p class="stage-note" data-stage="5 and 12">
+        Seeding, the per-location counts and the decoy map are wired to
+        <code>/api/workspace/seed</code>, <code>/api/workspace</code> and
+        <code>/api/canaries</code> in a later stage.
+      </p>
+    </div>
+  </section>
+
+  <!-- Screen 3 -->
+  <section class="screen" id="screen-run" aria-labelledby="h-run">
+    <h1 id="h-run">Live agent run</h1>
+    <p class="lede">
+      Pick an incoming email, choose the protection mode and the agent, and watch every
+      tool request pass through the gateway. Each run creates a new session, and the
+      protection mode is fixed when that session is created.
+    </p>
+    <div class="panel" id="run-panel">
+      <p class="stage-note" data-stage="10, 11 and 12">
+        The inbox picker, live trace, session controls, alert panel and attacker outbox
+        are wired to <code>/api/run/claude</code>, <code>/api/run/scripted</code>,
+        <code>/api/sessions/…</code> and <code>/api/alerts</code> in a later stage.
+      </p>
+    </div>
+  </section>
+
+  <!-- Screen 4 -->
+  <section class="screen" id="screen-audit" aria-labelledby="h-audit">
+    <h1 id="h-audit">Audit trail and admin controls</h1>
+    <p class="lede">
+      Every gateway decision and every administrator action, hash-chained per demo run.
+      Verification reports exactly which entry was altered.
+    </p>
+    <div class="panel" id="audit-panel">
+      <p class="stage-note" data-stage="7, 9, 12 and 14">
+        The audit table, chain verification, held-email review, HR access toggle and
+        beacon simulation are wired to <code>/api/audit</code>,
+        <code>/api/emails/held</code> and <code>/api/beacon/…</code> in a later stage.
+      </p>
+    </div>
+  </section>
+
+  <!-- Screen 5 -->
+  <section class="screen" id="screen-scoreboard" aria-labelledby="h-scoreboard">
+    <h1 id="h-scoreboard">Scoreboard</h1>
+    <p class="lede">
+      Results from the scenario suite, split by agent and protection mode, and by bulk
+      versus targeted attacks. Every number here is computed from runs that actually
+      executed.
+    </p>
+    <div class="panel" id="scoreboard-panel">
+      <p class="stage-note" data-stage="13">
+        The suite runner and metrics are wired to <code>/api/suite/run</code> and
+        <code>/api/suite/latest</code> in a later stage. No figure is shown until a
+        suite has run.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>
+    All records in this demo are synthetic and generated by this project. Email and
+    administrator alerts are simulated and stored locally; nothing is sent to anyone.
+    Customer addresses use the reserved domains <code>example.com</code>,
+    <code>example.net</code> and <code>example.org</code>; the company uses
+    <code>limco.example</code>; outside parties use <code>.test</code>.
+  </p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
