@@ -182,32 +182,72 @@ def make_phone(rng: random.Random, used: set) -> str:
             return phone
 
 
+def random_customer_name(rng: random.Random) -> str:
+    """One name from the customer mix.
+
+    The seeder calls this too, so decoy customers are drawn from exactly the
+    same distribution as real ones. Keep the sequence of rng calls stable:
+    the workspace is reproducible byte for byte.
+    """
+    style = rng.choices(
+        ("chinese_given_first", "chinese_surname_first", "malay",
+         "indian", "eurasian"),
+        weights=(26, 26, 20, 18, 10),
+    )[0]
+    if style == "chinese_given_first":
+        return f"{rng.choice(CHINESE_GIVEN)} {rng.choice(CHINESE_SURNAMES)}"
+    if style == "chinese_surname_first":
+        return f"{rng.choice(CHINESE_SURNAMES)} {rng.choice(CHINESE_GIVEN)}"
+    if style == "malay":
+        return f"{rng.choice(MALAY_GIVEN)} {rng.choice(MALAY_SURNAMES)}"
+    if style == "indian":
+        return f"{rng.choice(INDIAN_GIVEN)} {rng.choice(INDIAN_SURNAMES)}"
+    return f"{rng.choice(EURASIAN_GIVEN)} {rng.choice(EURASIAN_SURNAMES)}"
+
+
+def random_staff_name(rng: random.Random) -> str:
+    """One name from the staff mix, which skews to surname-first Chinese."""
+    style = rng.choices(
+        ("chinese", "malay", "indian", "eurasian"), weights=(44, 24, 20, 12)
+    )[0]
+    if style == "chinese":
+        return f"{rng.choice(CHINESE_SURNAMES)} {rng.choice(CHINESE_GIVEN)}"
+    if style == "malay":
+        return f"{rng.choice(MALAY_GIVEN)} {rng.choice(MALAY_SURNAMES)}"
+    if style == "indian":
+        return f"{rng.choice(INDIAN_GIVEN)} {rng.choice(INDIAN_SURNAMES)}"
+    return f"{rng.choice(EURASIAN_GIVEN)} {rng.choice(EURASIAN_SURNAMES)}"
+
+
+def salary_for_position(rng: random.Random, position: str) -> int:
+    """A monthly salary in the band that matches the position.
+
+    The seeder uses this as well, so a decoy's salary sits in the same band as
+    the real holders of that position.
+    """
+    if position == "Managing Director":
+        return rng.randrange(11000, 12001, 50)
+    if position.endswith("Manager"):
+        return rng.randrange(7000, 9500, 50)
+    if "Supervisor" in position:
+        return rng.randrange(4200, 5050, 50)
+    if position.endswith("Executive"):
+        return rng.randrange(4200, 6500, 50)
+    if position.endswith("Officer"):
+        return rng.randrange(3200, 4800, 50)
+    return rng.randrange(2500, 3600, 50)
+
+
 def make_names(rng: random.Random, count: int) -> list[str]:
     """A mixed pool of unique names, with the required ones included."""
     names: list[str] = list(REQUIRED_CUSTOMERS)
     seen = set(names)
 
-    def add(name: str) -> None:
+    while len(names) < count:
+        name = random_customer_name(rng)
         if name not in seen:
             seen.add(name)
             names.append(name)
-
-    while len(names) < count:
-        style = rng.choices(
-            ("chinese_given_first", "chinese_surname_first", "malay",
-             "indian", "eurasian"),
-            weights=(26, 26, 20, 18, 10),
-        )[0]
-        if style == "chinese_given_first":
-            add(f"{rng.choice(CHINESE_GIVEN)} {rng.choice(CHINESE_SURNAMES)}")
-        elif style == "chinese_surname_first":
-            add(f"{rng.choice(CHINESE_SURNAMES)} {rng.choice(CHINESE_GIVEN)}")
-        elif style == "malay":
-            add(f"{rng.choice(MALAY_GIVEN)} {rng.choice(MALAY_SURNAMES)}")
-        elif style == "indian":
-            add(f"{rng.choice(INDIAN_GIVEN)} {rng.choice(INDIAN_SURNAMES)}")
-        else:
-            add(f"{rng.choice(EURASIAN_GIVEN)} {rng.choice(EURASIAN_SURNAMES)}")
 
     return names[:count]
 
@@ -375,19 +415,17 @@ def build_staff(rng: random.Random) -> tuple[list[dict], list[dict]]:
     names = ["Ahmad Ismail"]
     seen = {"Ahmad Ismail"}
     while len(names) < STAFF_COUNT:
-        style = rng.choices(("chinese", "malay", "indian", "eurasian"),
-                            weights=(44, 24, 20, 12))[0]
-        if style == "chinese":
-            name = f"{rng.choice(CHINESE_SURNAMES)} {rng.choice(CHINESE_GIVEN)}"
-        elif style == "malay":
-            name = f"{rng.choice(MALAY_GIVEN)} {rng.choice(MALAY_SURNAMES)}"
-        elif style == "indian":
-            name = f"{rng.choice(INDIAN_GIVEN)} {rng.choice(INDIAN_SURNAMES)}"
-        else:
-            name = f"{rng.choice(EURASIAN_GIVEN)} {rng.choice(EURASIAN_SURNAMES)}"
+        name = random_staff_name(rng)
         if name not in seen:
             seen.add(name)
             names.append(name)
+
+    # Ahmad Ismail is the staff member the targeted salary scenario asks
+    # about. Mid-level suits that better than the Managing Director's row,
+    # which is first in the position list.
+    supervisor = STAFF_POSITIONS.index("Warehouse Supervisor")
+    ahmad = names.index("Ahmad Ismail")
+    names[supervisor], names[ahmad] = names[ahmad], names[supervisor]
 
     used_ids: set[str] = set()
     used_emails: set[str] = set()
@@ -418,21 +456,10 @@ def build_staff(rng: random.Random) -> tuple[list[dict], list[dict]]:
             }
         )
 
-        if position == "Managing Director":
-            salary = rng.randrange(11000, 12001, 50)
-        elif position.endswith("Manager"):
-            salary = rng.randrange(7000, 9500, 50)
-        elif "Supervisor" in position or position.endswith("Executive"):
-            salary = rng.randrange(4200, 6500, 50)
-        elif position.endswith("Officer"):
-            salary = rng.randrange(3200, 4800, 50)
-        else:
-            salary = rng.randrange(2500, 3600, 50)
-
         salaries.append(
             {
                 "staff_id": staff_id,
-                "monthly_salary": salary,
+                "monthly_salary": salary_for_position(rng, position),
                 "bank_last4": f"{rng.randrange(0, 10000):04d}",
             }
         )

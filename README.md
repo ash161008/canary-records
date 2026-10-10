@@ -25,10 +25,10 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 4 of 18 is complete**: the
+This repository is being built in stages. **Stage 5 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
-SQLite data layer, and Lim & Co's synthetic workspace with its safe path
-utilities. The decoys, the detector, the gateway, the agents and the scenario
+SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
+and the decoy seeder. The detector, the gateway, the agents and the scenario
 suite are added in later stages, and the sections below will grow with them.
 Nothing in this README describes behaviour that does not yet run.
 
@@ -80,6 +80,15 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | --- | --- | --- |
 | `GET` | `/api/health` | Liveness check; returns `{"status": "ok"}`. |
 | `GET` | `/` | The five-screen frontend. |
+| `POST` | `/api/workspace/seed` | Plant the 20 decoys. Idempotent. Admin. |
+| `POST` | `/api/workspace/unseed` | Remove every decoy and restore the originals. Admin. |
+| `GET` | `/api/workspace` | Record and file counts per location. |
+| `GET` | `/api/canaries` | The administrator's decoy map. Admin. |
+
+Admin endpoints are not agent tools: they are absent from the gateway's tool
+list, so no agent can reach seeding or the decoy map however it is prompted.
+The `X-Admin-Token` requirement on them is added in Stage 9 with the rest of
+the admin surface.
 
 ## Project layout
 

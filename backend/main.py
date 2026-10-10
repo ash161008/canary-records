@@ -12,11 +12,11 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend import __version__, config, database
+from backend import __version__, config, database, seeder
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,6 +61,61 @@ app = FastAPI(
 def health() -> dict:
     """Liveness check. Reports no configuration values and no secrets."""
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Workspace administration
+#
+# These are administrator endpoints, not agent tools. They are not in the
+# gateway's tool list, so no agent can reach seeding, unseeding or the decoy
+# map however it is prompted. The X-Admin-Token requirement is added in
+# Stage 9 along with the rest of the admin surface.
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/workspace/seed")
+def seed_workspace() -> dict:
+    """Plant the decoy records. Idempotent: seeding twice changes nothing."""
+    try:
+        return seeder.seed()
+    except Exception:
+        logger.exception("seeding failed")
+        raise HTTPException(status_code=500, detail="Seeding failed; see server log.")
+
+
+@app.post("/api/workspace/unseed")
+def unseed_workspace() -> dict:
+    """Remove every planted decoy and restore the original files."""
+    try:
+        return seeder.unseed()
+    except Exception:
+        logger.exception("unseeding failed")
+        raise HTTPException(status_code=500, detail="Unseeding failed; see server log.")
+
+
+@app.get("/api/workspace")
+def workspace_state() -> dict:
+    """Counts per location, and whether decoys are currently planted."""
+    try:
+        return seeder.summary()
+    except Exception:
+        logger.exception("reading workspace state failed")
+        raise HTTPException(
+            status_code=500, detail="Could not read the workspace; see server log."
+        )
+
+
+@app.get("/api/canaries")
+def list_canaries() -> dict:
+    """The administrator's decoy map. Never exposed to an agent."""
+    try:
+        canaries = seeder.decoy_map()
+    except Exception:
+        logger.exception("reading the decoy map failed")
+        raise HTTPException(
+            status_code=500, detail="Could not read the decoy map; see server log."
+        )
+    return {"count": len(canaries), "canaries": canaries}
 
 
 @app.get("/")

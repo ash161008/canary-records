@@ -1,5 +1,5 @@
 staff_id,name,position,email
-LC-0404,Ahmad Ismail,Managing Director,ahmad.ismail@limco.example
+LC-0404,Natalie Theseira,Managing Director,natalie.theseira@limco.example
 LC-0549,Loh Lay Peng,Operations Manager,loh.lay.peng@limco.example
 LC-0931,Muhammad Bakar,Accounts Manager,muhammad.bakar@limco.example
 LC-0908,Normah Bakar,Sales Executive,normah.bakar@limco.example
@@ -8,19 +8,19 @@ LC-0582,Noraini Yusof,Sales Executive,noraini.yusof@limco.example
 LC-0834,Mohan Balakrishnan,Customer Service Officer,mohan.balakrishnan@limco.example
 LC-0944,Shanti Menon,Customer Service Officer,shanti.menon@limco.example
 LC-0618,Goh Xiu Ying,Customer Service Officer,goh.xiu.ying@limco.example
-LC-0530,Natalie Theseira,Warehouse Supervisor,natalie.theseira@limco.example
-LC-0855,Loh Wei Ming,Warehouse Assistant,loh.wei.ming@limco.example
-LC-0811,Shahrul Shariff,Warehouse Assistant,shahrul.shariff@limco.example
-LC-0756,Lorraine Scully,Warehouse Assistant,lorraine.scully@limco.example
-LC-0745,Tay Boon Keng,Delivery Driver,tay.boon.keng@limco.example
-LC-0103,Bernard Rodrigues,Delivery Driver,bernard.rodrigues@limco.example
-LC-0743,Shahrul Osman,Delivery Driver,shahrul.osman@limco.example
-LC-0689,Chia Wei Ming,Procurement Executive,chia.wei.ming@limco.example
-LC-0261,Priya Balakrishnan,Procurement Assistant,priya.balakrishnan@limco.example
-LC-0830,Clement Clarke,HR Executive,clement.clarke@limco.example
-LC-0967,Chan Zhi Hao,Accounts Assistant,chan.zhi.hao@limco.example
-LC-0911,Shahrul Mansor,Accounts Assistant,shahrul.mansor@limco.example
-LC-0589,Teo Swee Lin,IT Support Officer,teo.swee.lin@limco.example
-LC-0277,Ahmad Abdullah,Marketing Executive,ahmad.abdullah@limco.example
-LC-0946,Derek Shepherdson,Admin Assistant,derek.shepherdson@limco.example
-LC-0303,Chew Boon Keng,Admin Assistant,chew.boon.keng@limco.example
+LC-0530,Ahmad Ismail,Warehouse Supervisor,ahmad.ismail@limco.example
+LC-0811,Loh Wei Ming,Warehouse Assistant,loh.wei.ming@limco.example
+LC-0756,Shahrul Shariff,Warehouse Assistant,shahrul.shariff@limco.example
+LC-0745,Lorraine Scully,Warehouse Assistant,lorraine.scully@limco.example
+LC-0103,Tay Boon Keng,Delivery Driver,tay.boon.keng@limco.example
+LC-0743,Bernard Rodrigues,Delivery Driver,bernard.rodrigues@limco.example
+LC-0689,Shahrul Osman,Delivery Driver,shahrul.osman@limco.example
+LC-0261,Chia Wei Ming,Procurement Executive,chia.wei.ming@limco.example
+LC-0830,Priya Balakrishnan,Procurement Assistant,priya.balakrishnan@limco.example
+LC-0967,Clement Clarke,HR Executive,clement.clarke@limco.example
+LC-0911,Chan Zhi Hao,Accounts Assistant,chan.zhi.hao@limco.example
+LC-0589,Shahrul Mansor,Accounts Assistant,shahrul.mansor@limco.example
+LC-0277,Teo Swee Lin,IT Support Officer,teo.swee.lin@limco.example
+LC-0303,Ahmad Abdullah,Marketing Executive,ahmad.abdullah@limco.example
+LC-0476,Derek Shepherdson,Admin Assistant,derek.shepherdson@limco.example
+LC-0997,Chew Boon Keng,Admin Assistant,chew.boon.keng@limco.example
