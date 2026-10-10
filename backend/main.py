@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend import __version__, config
+from backend import __version__, config, database
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,12 +27,20 @@ logger = logging.getLogger("canary_records")
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Log what the process is running, without any secret values."""
+    """Prepare the data layer and log what the process is running.
+
+    Initialisation is idempotent, so a restart neither loses nor duplicates
+    anything. The canary registry is not touched here: only the seeder and
+    the detector may open it.
+    """
+    database.init_app_db()
+    run = database.get_or_create_active_demo_run()
     logger.info(
-        "Canary Records %s starting (demo_mode=%s, claude_configured=%s)",
+        "Canary Records %s starting (demo_mode=%s, claude_configured=%s, run=%s)",
         __version__,
         config.DEMO_MODE,
         config.has_claude_credentials(),
+        run.run_id,
     )
     yield
     logger.info("Canary Records shutting down")

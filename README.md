@@ -25,11 +25,11 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 2 of 18 is complete**: the
-project skeleton, the five-screen frontend shell, and the health endpoint. The
-security system, the data layer, the agents and the scenario suite are added in
-later stages, and the sections below will grow with them. Nothing in this README
-describes behaviour that does not yet run.
+This repository is being built in stages. **Stage 3 of 18 is complete**: the
+project skeleton, the five-screen frontend shell, the health endpoint, and the
+SQLite data layer. The security system, the workspace data, the agents and the
+scenario suite are added in later stages, and the sections below will grow with
+them. Nothing in this README describes behaviour that does not yet run.
 
 ## Requirements
 
@@ -90,10 +90,30 @@ scripts/     generators and the Claude smoke test
 docs/        the staged build specification
 ```
 
-`vault/` is kept out of `workspace/` and is opened only by `backend/detector.py`
-and `backend/seeder.py`. That is a code-level boundary, not an OS-level one: a
-separate file and a restricted import list, not a sandbox or a separate
-privilege domain. The honest limitations list is written in Stage 17.
+### The registry boundary, and what it is not
+
+`vault/registry.db` holds the only record of which workspace values are decoys.
+It is kept outside `workspace/`, and every function that opens it checks its
+calling module and raises `PermissionError` unless the caller is
+`backend/seeder.py` or `backend/detector.py`. The agent's tools reach the
+workspace through path utilities that cannot resolve outside `workspace/`, so
+no tool path leads to `vault/` or `data/`.
+
+**This is a code-level boundary, not an OS-level one.** A separate file plus a
+caller allowlist stops the agent's tool paths from reaching the registry; it is
+not a sandbox, a separate process, a separate privilege domain, or filesystem
+permissions. Any backend code could be changed to add itself to that allowlist.
+A production version would put the registry behind a separate service with its
+own credentials. The full limitations list is written in Stage 17.
+
+### Databases
+
+`data/app.db` holds demo runs, agent sessions, audit events, alerts, simulated
+emails and scenario-suite results. Both databases are created on demand and
+initialisation is idempotent, so restarting the server neither loses nor
+duplicates anything. A session's `protection_mode` is fixed when the session is
+created, enforced both by the update helper and by a SQLite trigger that aborts
+the write even if raw SQL attempts it; to compare modes, create a new session.
 
 ## Team
 
