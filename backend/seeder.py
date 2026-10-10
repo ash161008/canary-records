@@ -506,7 +506,12 @@ Contract file: {contract_number}
             "location": f"workspace/{SUPPLIER_TERMS_TXT}",
             "record_ref": "whole document",
             "strong_values": [contract_number, supplier],
-            "weak_values": [str(rebate), location],
+            # No weak values. The only candidates would be the supplier's
+            # city and a percentage, both of which occur in ordinary business
+            # text; two of them together would hold innocent messages for
+            # review. The contract number and supplier name are strong on
+            # their own.
+            "weak_values": [],
         }
     ]
 

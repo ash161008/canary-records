@@ -25,10 +25,10 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 5 of 18 is complete**: the
+This repository is being built in stages. **Stage 6 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
-and the decoy seeder. The detector, the gateway, the agents and the scenario
+the decoy seeder, and the detector. The gateway, the agents and the scenario
 suite are added in later stages, and the sections below will grow with them.
 Nothing in this README describes behaviour that does not yet run.
 
