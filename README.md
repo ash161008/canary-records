@@ -120,6 +120,33 @@ permissions. Any backend code could be changed to add itself to that allowlist.
 A production version would put the registry behind a separate service with its
 own credentials. The full limitations list is written in Stage 17.
 
+### Detector limitations
+
+The detector is a containment layer, not a guarantee. It canonicalises values
+by type (a phone is matched as a phone, inside phone-shaped tokens only), NFKC
+normalises its input and strips zero-width and format characters, and looks one
+level deep for base64, hex, URL-encoded and written-out (`[at]`, `[dot]`)
+content. These evasions are **known gaps that it does not detect**:
+
+- **Double encoding.** Decoding is deliberately one level only, so content
+  encoded twice — base64 of base64, for example — is not recovered. Unbounded
+  decoding is a denial-of-service surface, so the bound is the safer trade.
+- **Reversed or transposed text.** A value written backwards, or with its
+  characters otherwise rearranged, is not matched.
+- **Identifiers split by spaces.** Phone numbers survive arbitrary spacing
+  because digits are canonicalised inside phone tokens, but an API key, staff
+  id or contract number **split by spaces** between its characters is not
+  matched; those are compared exactly, case-insensitively.
+- **Content over the scan limit.** Only the first 200 KB is examined. The
+  detector reports this as `truncated`, and the gateway fails closed on it:
+  an oversized read result is withheld and an oversized outbound message is
+  hard-denied, rather than acted on from a partial scan.
+
+A `NONE` result means no registered decoy was found in what was scanned. It
+never means the content is safe — the role checks, the data-owner rule, the
+personal-item limits and the taint rule all still apply, and they do not depend
+on detection succeeding.
+
 ### Databases
 
 `data/app.db` holds demo runs, agent sessions, audit events, alerts, simulated

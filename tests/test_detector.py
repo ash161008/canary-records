@@ -640,3 +640,295 @@ def test_detector_reads_the_registry_and_the_seeder_writes_it(seeded):
     """Both halves of the registry boundary still work."""
     assert len(detector.load_active_canaries()) == 20
     assert detector.load_canary(seeded["customer"].id) is not None
+
+
+# ---------------------------------------------------------------------------
+# Failing closed on size
+# ---------------------------------------------------------------------------
+
+
+def test_oversized_content_is_reported_as_truncated(seeded):
+    """A NONE from a partial scan must never look like a clean result."""
+    payload = "x" * (detector.MAX_INPUT_BYTES + 1)
+
+    findings = detector.find_canaries(payload)
+
+    assert findings.truncated is True
+    assert findings.confidence == detector.NONE
+
+
+def test_content_within_the_limit_is_not_truncated(seeded):
+    findings = detector.find_canaries("An ordinary short message.")
+
+    assert findings.truncated is False
+
+
+def test_content_exactly_at_the_limit_is_not_truncated(seeded):
+    findings = detector.find_canaries("x" * detector.MAX_INPUT_BYTES)
+
+    assert findings.truncated is False
+
+
+def test_exceeds_scan_limit_is_the_gateways_signal(seeded):
+    assert detector.exceeds_scan_limit("x" * (detector.MAX_INPUT_BYTES + 1)) is True
+    assert detector.exceeds_scan_limit("x" * detector.MAX_INPUT_BYTES) is False
+    assert detector.exceeds_scan_limit("") is False
+
+
+def test_a_decoy_hidden_past_the_limit_still_raises_the_truncated_flag(seeded):
+    """The case that matters: the decoy is in the part that was not scanned."""
+    padding = "x" * (detector.MAX_INPUT_BYTES + 1000)
+
+    findings = detector.find_canaries(padding + seeded["customer_email"])
+
+    assert findings.confidence == detector.NONE
+    assert findings.truncated is True
+
+
+def test_truncation_is_reported_even_with_an_empty_registry(tmp_path, monkeypatch):
+    """The size signal does not depend on anything being seeded."""
+    root = tmp_path / "workspace"
+    monkeypatch.setattr(config, "WORKSPACE_DIR", root)
+    gw.generate(root)
+    seeder.init_registry()
+
+    findings = detector.find_canaries("x" * (detector.MAX_INPUT_BYTES + 1))
+
+    assert findings.truncated is True
+
+
+def test_a_strong_match_inside_the_limit_is_still_reported_when_truncated(seeded):
+    """Truncation does not suppress what was found."""
+    payload = (
+        seeded["customer_email"] + " " + "x" * (detector.MAX_INPUT_BYTES + 1000)
+    )
+
+    findings = detector.find_canaries(payload)
+
+    assert findings.confidence == detector.STRONG
+    assert findings.truncated is True
+
+
+# ---------------------------------------------------------------------------
+# Unicode normalisation and invisible characters
+# ---------------------------------------------------------------------------
+
+
+def test_full_width_digits_in_a_phone_are_strong(seeded):
+    digits = seeded["customer_phone"].removeprefix("+65")
+    full_width = "".join(chr(ord(char) - ord("0") + 0xFF10) for char in digits)
+
+    assert detector.find_canaries(full_width).confidence == detector.STRONG
+
+
+def test_full_width_at_sign_in_an_email_is_strong(seeded):
+    email = seeded["customer_email"].replace("@", "\uff20")
+
+    assert detector.find_canaries(email).confidence == detector.STRONG
+
+
+def test_zero_width_space_inside_an_email_is_strong(seeded):
+    email = seeded["customer_email"]
+    broken = email[:4] + "\u200b" + email[4:]
+
+    assert detector.find_canaries(broken).confidence == detector.STRONG
+
+
+def test_soft_hyphen_inside_a_staff_id_is_strong(seeded):
+    staff_id = seeded["salary"].strong_values()[0]
+    broken = staff_id[:3] + "\u00ad" + staff_id[3:]
+
+    assert detector.find_canaries(broken).confidence == detector.STRONG
+
+
+def test_zero_width_joiner_inside_an_api_key_is_strong(seeded):
+    api_key = seeded["credential"].strong_values()[0]
+    broken = api_key[:10] + "\u200d" + api_key[10:]
+
+    assert detector.find_canaries(broken).confidence == detector.STRONG
+
+
+def test_byte_order_mark_and_word_joiner_are_stripped(seeded):
+    email = seeded["customer_email"]
+    broken = "\ufeff" + email[:3] + "\u2060" + email[3:]
+
+    assert detector.find_canaries(broken).confidence == detector.STRONG
+
+
+def test_extract_personal_sees_through_invisible_characters(seeded):
+    items = detector.extract_personal("some\u200bone@exam\u200cple.com")
+
+    assert detector.PersonalItem("email", "someone@example.com") in items
+
+
+def test_extract_personal_sees_through_full_width_digits(seeded):
+    full_width = "".join(chr(ord(char) - ord("0") + 0xFF10) for char in "91234567")
+
+    items = detector.extract_personal(f"call {full_width}")
+
+    assert detector.PersonalItem("phone", "91234567") in items
+
+
+def test_ascii_text_is_passed_through_unchanged(seeded):
+    """The fast path must not alter ordinary content."""
+    text = "Order 1042 shipped on 2026-09-22 for $365.00."
+
+    assert detector._prepare(text) == text
+
+
+def test_normalisation_does_not_create_false_positives(seeded):
+    """Folding must not turn ordinary text into a match."""
+    findings = detector.find_canaries("Café opening hours are 9am – 6pm.")
+
+    assert findings.confidence == detector.NONE
+
+
+# ---------------------------------------------------------------------------
+# Written-out separators
+# ---------------------------------------------------------------------------
+
+
+def test_bracketed_at_obfuscation_is_strong(seeded):
+    local, _, domain = seeded["customer_email"].partition("@")
+
+    findings = detector.find_canaries(f"Contact {local}[at]{domain}")
+
+    assert findings.confidence == detector.STRONG
+
+
+def test_parenthesised_at_obfuscation_is_strong(seeded):
+    local, _, domain = seeded["customer_email"].partition("@")
+
+    findings = detector.find_canaries(f"Contact {local}(at){domain}")
+
+    assert findings.confidence == detector.STRONG
+
+
+def test_spaced_at_and_dot_obfuscation_is_strong(seeded):
+    local, _, domain = seeded["customer_email"].partition("@")
+    spoken = f"{local} at {domain.replace('.', ' dot ')}"
+
+    findings = detector.find_canaries(f"Email them on {spoken}")
+
+    assert findings.confidence == detector.STRONG
+
+
+def test_bracketed_dot_obfuscation_is_strong(seeded):
+    email = seeded["customer_email"].replace(".", "[dot]")
+
+    assert detector.find_canaries(email).confidence == detector.STRONG
+
+
+def test_at_obfuscation_is_case_insensitive(seeded):
+    local, _, domain = seeded["customer_email"].partition("@")
+
+    findings = detector.find_canaries(f"{local}[AT]{domain.replace('.', '[DOT]')}")
+
+    assert findings.confidence == detector.STRONG
+
+
+def test_deobfuscation_adds_only_one_candidate(seeded):
+    candidates = detector.decode_candidates("someone [at] example [dot] com")
+
+    assert candidates == ["someone@example.com"]
+
+
+def test_ordinary_prose_containing_at_is_still_none(seeded):
+    """Rewriting " at " must not manufacture a match."""
+    findings = detector.find_canaries(
+        "Please look at the delivery note and call us at the office."
+    )
+
+    assert findings.confidence == detector.NONE
+
+
+# ---------------------------------------------------------------------------
+# Amounts
+# ---------------------------------------------------------------------------
+
+
+def test_amount_canonicalisation():
+    assert detector.canonicalise_amount("$6,450") == "6450"
+    assert detector.canonicalise_amount("6,450.00") == "6450"
+    assert detector.canonicalise_amount("6450") == "6450"
+    assert detector.canonicalise_amount(" S$ 11,350 ") == "11350"
+    assert detector.canonicalise_amount("4700.50") == "4700.5"
+
+
+def test_a_salary_with_thousands_separator_and_dollar_sign_is_weak(seeded):
+    name, amount = seeded["salary"].weak_values()
+    formatted = f"${int(amount):,}"
+
+    findings = detector.find_canaries(f"{name} is paid {formatted} a month")
+
+    assert formatted != amount
+    assert findings.confidence == detector.WEAK
+
+
+def test_a_salary_with_a_comma_only_is_weak(seeded):
+    name, amount = seeded["salary"].weak_values()
+
+    findings = detector.find_canaries(f"{name}: {int(amount):,}")
+
+    assert findings.confidence == detector.WEAK
+
+
+def test_a_salary_with_trailing_cents_is_weak(seeded):
+    name, amount = seeded["salary"].weak_values()
+
+    findings = detector.find_canaries(f"{name} earns {int(amount):,}.00 monthly")
+
+    assert findings.confidence == detector.WEAK
+
+
+def test_a_different_amount_is_not_a_match(seeded):
+    name, amount = seeded["salary"].weak_values()
+
+    findings = detector.find_canaries(f"{name} earns ${int(amount) + 100:,}")
+
+    assert findings.confidence == detector.NONE
+
+
+def test_amounts_in_a_comma_separated_list_are_still_extracted(seeded):
+    """Bounding the grouped pattern must not break ordinary lists."""
+    name, amount = seeded["salary"].weak_values()
+
+    findings = detector.find_canaries(f"{name}: 100, {amount}, 300")
+
+    assert findings.confidence == detector.WEAK
+
+
+# ---------------------------------------------------------------------------
+# Documented limitations
+# ---------------------------------------------------------------------------
+
+
+def test_readme_records_the_detector_limitations():
+    """The gaps the detector does not close must be stated, not implied."""
+    readme = (config.BASE_DIR / "README.md").read_text(encoding="utf-8").lower()
+
+    assert "double" in readme and "encod" in readme
+    assert "revers" in readme
+    assert "split by spaces" in readme
+
+
+def test_double_encoding_is_a_known_gap(seeded):
+    """Documented, not fixed: decoding is one level only."""
+    once = base64.b64encode(seeded["customer_email"].encode()).decode()
+    twice = base64.b64encode(once.encode()).decode()
+
+    assert detector.find_canaries(twice).confidence == detector.NONE
+
+
+def test_reversed_text_is_a_known_gap(seeded):
+    assert (
+        detector.find_canaries(seeded["customer_email"][::-1]).confidence
+        == detector.NONE
+    )
+
+
+def test_a_key_split_by_spaces_is_a_known_gap(seeded):
+    """Phones survive spacing; identifiers do not."""
+    api_key = seeded["credential"].strong_values()[0]
+
+    assert detector.find_canaries(" ".join(api_key)).confidence == detector.NONE

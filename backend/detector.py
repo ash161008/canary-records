@@ -30,6 +30,7 @@ import binascii
 import csv
 import logging
 import re
+import unicodedata
 import urllib.parse
 from dataclasses import dataclass, field
 
@@ -58,6 +59,7 @@ KIND_NAME = "name"
 KIND_TEXT = "text"
 
 # Bounds on decoding, so a large or hostile input cannot make this expensive.
+# The input cap is applied to the string's length in characters.
 MAX_INPUT_BYTES = 200 * 1024
 MAX_CANDIDATES = 50
 MIN_BLOCK_CHARS = 16
@@ -86,7 +88,12 @@ _PHONE_TOKEN = re.compile(r"(?:\+?[ ]{0,2}65[\s.\-()]{0,3})?(?:\d[\s.\-()]{0,3})
 _EMAIL = re.compile(r"[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]{1,255}\.[A-Za-z]{2,24}")
 _STAFF_ID = re.compile(r"(?<![A-Za-z0-9])LC-\d{4}(?![A-Za-z0-9])", re.IGNORECASE)
 _POSTAL = re.compile(r"(?<!\d)\d{6}(?!\d)")
-_DIGIT_RUN = re.compile(r"(?<![\d.])\d{1,9}(?:\.\d+)?(?![\d])")
+
+# Amounts come in two shapes: plain runs of digits, and groups separated by
+# thousands commas. Both are canonicalised the same way, so "$6,450" in a
+# message matches a stored amount of 6450.
+_DIGIT_RUN = re.compile(r"(?<![\d.,])\d{1,9}(?:\.\d+)?(?![\d])")
+_GROUPED_AMOUNT = re.compile(r"(?<![\d,.])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d,])")
 
 # A letter, seven digits and a letter: the shape of an NRIC or FIN. The
 # dataset contains none; this exists so the gateway would catch one.
@@ -102,6 +109,70 @@ _PERCENT_ESCAPE = re.compile(r"%[0-9A-Fa-f]{2}")
 
 _WORD = re.compile(r"[A-Za-z0-9'@.+\-]+")
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
+
+# Written-out separators, used to smuggle an address past a scanner:
+# "someone [at] example [dot] com". Quantifiers are bounded, for the same
+# reason as everywhere else in this module.
+# The whitespace around a bracketed form is consumed too: "a [at] b" has to
+# become "a@b", not "a @ b", or the email pattern still will not match it.
+_OBFUSCATED_AT = re.compile(
+    r"\s{0,2}(?:\[\s{0,2}at\s{0,2}\]|\(\s{0,2}at\s{0,2}\))\s{0,2}|\s{1,4}at\s{1,4}",
+    re.IGNORECASE,
+)
+_OBFUSCATED_DOT = re.compile(
+    r"\s{0,2}(?:\[\s{0,2}dot\s{0,2}\]|\(\s{0,2}dot\s{0,2}\))\s{0,2}|\s{1,4}dot\s{1,4}",
+    re.IGNORECASE,
+)
+
+# Invisible characters that can be dropped inside a value to break an exact
+# match: zero-width space, joiners, soft hyphen, word joiner, byte-order mark.
+# Everything in Unicode category Cf is removed as well.
+_INVISIBLE_CHARS = frozenset(
+    "\u00ad"              # soft hyphen
+    "\u200b\u200c\u200d"  # zero-width space, non-joiner, joiner
+    "\u200e\u200f"        # left-to-right / right-to-left marks
+    "\u2060\u2061\u2062\u2063\u2064"  # word joiner, invisible operators
+    "\ufeff"              # byte-order mark
+)
+
+
+def _prepare(text: str) -> str:
+    """Normalise text before anything scans it.
+
+    Two transport-level unwrappings, applied to the whole input:
+
+    * NFKC normalisation, so full-width and other compatibility forms fold to
+      their ASCII equivalents - "＋６５９８２３１７６４" becomes
+      "+6598231764", and "＠" becomes "@";
+    * removal of zero-width and format characters, so an invisible character
+      dropped inside an email address or a staff id cannot break the match.
+
+    This is not the same thing as the type-specific canonicalisation further
+    down, and does not undermine it. This step only undoes ways of writing the
+    *same characters*; how a phone, an email or a name is then compared still
+    depends on its kind.
+
+    ASCII input is returned unchanged: it is already NFKC-stable and contains
+    no format characters, so the common case costs one scan of the string.
+    """
+    if not text or text.isascii():
+        return text
+
+    normalised = unicodedata.normalize("NFKC", text)
+    return "".join(
+        char
+        for char in normalised
+        if char not in _INVISIBLE_CHARS and unicodedata.category(char) != "Cf"
+    )
+
+
+def exceeds_scan_limit(text: str) -> bool:
+    """True when content is too large to scan in full.
+
+    The gateway must fail closed on this: withhold a read result and
+    hard-deny an outbound message rather than act on a partial scan.
+    """
+    return bool(text) and len(text) > MAX_INPUT_BYTES
 
 
 def _mask_spans(text: str, spans: list[tuple[int, int]]) -> str:
@@ -155,6 +226,23 @@ def canonicalise_identifier(value: str) -> str:
 def canonicalise_name(value: str) -> str:
     """Whitespace collapsed, lowercased."""
     return " ".join(value.split()).lower()
+
+
+def canonicalise_amount(value: str) -> str:
+    """Digits only, so "$6,450" and "6450.00" both become "6450".
+
+    Strips currency symbols, thousands separators and whitespace, and drops a
+    decimal part that is all zeros. A salary written as "$6,450" in a message
+    has to match an amount stored as "6450".
+    """
+    cleaned = re.sub(r"[^\d.]", "", value.strip())
+    if not cleaned:
+        return ""
+    if "." in cleaned:
+        whole, _, fraction = cleaned.partition(".")
+        fraction = fraction.rstrip("0")
+        return whole if not fraction else f"{whole}.{fraction}"
+    return cleaned
 
 
 def canonicalise_text(value: str) -> str:
@@ -214,7 +302,7 @@ def decode_candidates(text: str) -> list[str]:
     if not text:
         return []
 
-    source = text[:MAX_INPUT_BYTES]
+    source = _prepare(text)[:MAX_INPUT_BYTES]
     candidates: list[str] = []
     seen: set[str] = {source}
 
@@ -232,6 +320,11 @@ def decode_candidates(text: str) -> list[str]:
     if _PERCENT_ESCAPE.search(source):
         offer(urllib.parse.unquote(source))
         offer(urllib.parse.unquote_plus(source))
+
+    # Written-out separators: "someone [at] example [dot] com".
+    deobfuscated = _OBFUSCATED_DOT.sub(".", _OBFUSCATED_AT.sub("@", source))
+    if deobfuscated != source:
+        offer(deobfuscated)
 
     for match in _BASE64_BLOCK.finditer(source):
         block = match.group(0)
@@ -289,7 +382,15 @@ class _TextIndex:
         self.postals = {
             m.group(0) for m in _POSTAL.finditer(_mask_spans(self.raw, phone_spans))
         }
-        self.amounts = {m.group(0) for m in _DIGIT_RUN.finditer(self.raw)}
+
+        # Both amount shapes are reduced to digits, so a stored amount matches
+        # however the message wrote it: 6450, 6,450, $6,450 or $6,450.00.
+        self.amounts = {
+            canonicalise_amount(match.group(0))
+            for pattern in (_DIGIT_RUN, _GROUPED_AMOUNT)
+            for match in pattern.finditer(self.raw)
+        }
+        self.amounts.discard("")
 
         self.words = [word.lower() for word in _WORD.findall(self.raw)]
         self.word_set = set(self.words)
@@ -312,7 +413,7 @@ class _TextIndex:
             return value.strip() in self.postals
 
         if kind == KIND_AMOUNT:
-            return value.strip() in self.amounts
+            return canonicalise_amount(value) in self.amounts
 
         if kind == KIND_IDENTIFIER:
             pattern = re.compile(
@@ -370,10 +471,17 @@ class Findings:
     ``confidence`` is the strongest level across every decoy: STRONG if any
     decoy matched strongly, else WEAK, else NONE. NONE means no registered
     decoy was present, not that the content is safe.
+
+    ``truncated`` is True when the content was larger than the scan limit, so
+    only its first 200 KB was examined. A NONE result with ``truncated`` set
+    means "nothing found in the part that was scanned", which is not the same
+    as "nothing there". The gateway must fail closed on it: withhold the read
+    result, hard-deny the outbound message. Never act on a partial scan.
     """
 
     confidence: str = NONE
     matches: list[CanaryMatch] = field(default_factory=list)
+    truncated: bool = False
 
     @property
     def is_strong(self) -> bool:
@@ -418,16 +526,23 @@ def find_canaries(text: str) -> Findings:
     * WEAK: two or more of one decoy's weak values are present, and no
       strong value. A name alone is never even WEAK.
     * NONE: neither.
+
+    The text is NFKC normalised and stripped of invisible characters first,
+    and ``Findings.truncated`` reports whether it was too large to scan in
+    full. A caller must not treat a truncated NONE as a clean result.
     """
     if not text:
         return Findings()
 
+    truncated = exceeds_scan_limit(text)
+
     canaries = load_active_canaries()
     if not canaries:
-        return Findings()
+        return Findings(truncated=truncated)
 
-    indexes = [_TextIndex(text)]
-    indexes.extend(_TextIndex(candidate) for candidate in decode_candidates(text))
+    prepared = _prepare(text)[:MAX_INPUT_BYTES]
+    indexes = [_TextIndex(prepared)]
+    indexes.extend(_TextIndex(candidate) for candidate in decode_candidates(prepared))
 
     matches: list[CanaryMatch] = []
     for canary in canaries:
@@ -467,10 +582,10 @@ def find_canaries(text: str) -> Findings:
             )
 
     if not matches:
-        return Findings()
+        return Findings(truncated=truncated)
 
     confidence = STRONG if any(m.confidence == STRONG for m in matches) else WEAK
-    return Findings(confidence=confidence, matches=matches)
+    return Findings(confidence=confidence, matches=matches, truncated=truncated)
 
 
 # ---------------------------------------------------------------------------
@@ -493,13 +608,18 @@ def extract_personal(text: str) -> list[PersonalItem]:
     strings. Matched spans are masked as they are consumed, so digits inside a
     phone number are not also counted as a postal code.
 
+    The text is NFKC normalised and stripped of invisible characters first, so
+    a full-width or zero-width-padded value is still found. Content past the
+    scan limit is not examined; call ``exceeds_scan_limit`` and fail closed
+    rather than trusting a short result from a huge input.
+
     The dataset contains no NRICs; that pattern is here so the gateway would
     catch one if it ever appeared.
     """
     if not text:
         return []
 
-    source = text[:MAX_INPUT_BYTES]
+    source = _prepare(text)[:MAX_INPUT_BYTES]
     items: list[PersonalItem] = []
     seen: set[tuple[str, str]] = set()
 
