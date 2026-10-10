@@ -932,3 +932,83 @@ def test_a_key_split_by_spaces_is_a_known_gap(seeded):
     api_key = seeded["credential"].strong_values()[0]
 
     assert detector.find_canaries(" ".join(api_key)).confidence == detector.NONE
+
+
+# ---------------------------------------------------------------------------
+# scan(): one call, one result
+# ---------------------------------------------------------------------------
+
+
+def test_scan_reports_canaries_and_personal_items_together(seeded):
+    text = (
+        f"Customer {seeded['customer_email']} on {seeded['customer_phone']}, "
+        "copy to manager@limco.example"
+    )
+
+    result = detector.scan(text)
+
+    assert result.confidence == detector.STRONG
+    assert result.canary_ids == [seeded["customer"].id]
+    assert result.personal_count == 3
+    assert result.truncated is False
+
+
+def test_scan_agrees_with_the_narrower_functions(seeded):
+    text = f"{seeded['customer_name']} at {seeded['customer_address']}, LC-0142"
+
+    result = detector.scan(text)
+
+    assert result.confidence == detector.find_canaries(text).confidence
+    assert result.personal == detector.extract_personal(text)
+
+
+def test_scan_reports_truncation(seeded):
+    result = detector.scan("x" * (detector.MAX_INPUT_BYTES + 1))
+
+    assert result.truncated is True
+    assert result.fully_scanned is False
+
+
+def test_scan_of_ordinary_text_is_clean(seeded):
+    result = detector.scan("Our opening hours are 9am to 6pm, Monday to Friday.")
+
+    assert result.confidence == detector.NONE
+    assert result.personal_count == 0
+    assert result.truncated is False
+    assert result.fully_scanned is True
+
+
+def test_scan_of_empty_text(seeded):
+    result = detector.scan("")
+
+    assert result.confidence == detector.NONE
+    assert result.personal == []
+    assert result.truncated is False
+
+
+def test_scan_exposes_the_locations_for_an_alert(seeded):
+    result = detector.scan(seeded["credential"].strong_values()[0])
+
+    assert result.locations == ["workspace/it/integrations.txt"]
+    assert result.is_strong is True
+    assert result.is_weak is False
+
+
+def test_scan_weak_result_flags(seeded):
+    result = detector.scan(
+        f"{seeded['customer_name']} lives at {seeded['customer_address']}"
+    )
+
+    assert result.is_weak is True
+    assert result.is_strong is False
+
+
+def test_scan_prepares_the_text_only_once(seeded):
+    """Both halves see the same normalised content."""
+    email = seeded["customer_email"]
+    broken = email[:4] + "\u200b" + email[4:]
+
+    result = detector.scan(broken)
+
+    assert result.confidence == detector.STRONG
+    assert detector.PersonalItem("email", email) in result.personal

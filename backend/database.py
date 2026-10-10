@@ -700,6 +700,21 @@ def list_audit_events(
         )
 
 
+def overwrite_audit_event_reason_for_demo(event_id: int, reason: str) -> None:
+    """Rewrite one event's reason WITHOUT updating any hash.
+
+    Demo only. This exists so the interface can show that an edited log is
+    detectable: it changes a hashed field and deliberately leaves the stored
+    fingerprint stale, which is what verification then catches. Nothing in
+    normal operation updates an audit event - the log is append-only.
+    """
+    with app_connection() as connection:
+        connection.execute(
+            "UPDATE audit_events SET reason = ? WHERE id = ?", (reason, event_id)
+        )
+    logger.warning("DEMO: audit event %s was edited deliberately", event_id)
+
+
 def get_last_audit_event(
     run_id: str, connection: sqlite3.Connection | None = None
 ) -> AuditEvent | None:

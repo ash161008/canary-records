@@ -9,14 +9,15 @@ agent endpoints and the admin surface are added in later stages.
 """
 
 import logging
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend import __version__, config, database, seeder
+from backend import __version__, audit, config, database, seeder
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,6 +56,29 @@ app = FastAPI(
     version=__version__,
     lifespan=lifespan,
 )
+
+
+def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
+    """Require the administrator token on an admin endpoint.
+
+    Fails closed: if ADMIN_TOKEN is not configured, no admin endpoint works.
+    The token is compared with ``secrets.compare_digest`` and is never
+    returned, logged or echoed in an error. Stage 9 applies this to the rest
+    of the admin surface.
+    """
+    expected = config.ADMIN_TOKEN
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Administrator actions are unavailable: ADMIN_TOKEN is not "
+                "configured on the server."
+            ),
+        )
+    if not x_admin_token or not secrets.compare_digest(x_admin_token, expected):
+        raise HTTPException(
+            status_code=401, detail="A valid administrator token is required."
+        )
 
 
 @app.get("/api/health")
@@ -116,6 +140,58 @@ def list_canaries() -> dict:
             status_code=500, detail="Could not read the decoy map; see server log."
         )
     return {"count": len(canaries), "canaries": canaries}
+
+
+# ---------------------------------------------------------------------------
+# Audit log
+# ---------------------------------------------------------------------------
+
+
+def _resolve_run_id(run_id: str | None) -> str:
+    """The run being asked about, defaulting to the current one."""
+    if run_id:
+        return run_id
+    return database.get_or_create_active_demo_run().run_id
+
+
+@app.get("/api/audit")
+def get_audit(run_id: str | None = None, session_id: str | None = None) -> dict:
+    """The audit log for one run, oldest first.
+
+    Returns stored decisions and references only. File contents are never in
+    the log, so they cannot be read back out of it.
+    """
+    resolved = _resolve_run_id(run_id)
+    events = audit.list_audit_events(run_id=resolved, session_id=session_id)
+
+    return {
+        "run_id": resolved,
+        "count": len(events),
+        "events": [event.model_dump() for event in events],
+    }
+
+
+@app.post("/api/audit/verify")
+def verify_audit(run_id: str | None = None) -> dict:
+    """Verify a run's chain, reporting the first entry that fails."""
+    resolved = _resolve_run_id(run_id)
+    result = audit.verify_audit_chain(resolved)
+    return {"run_id": resolved, **result}
+
+
+if config.DEMO_MODE:
+
+    @app.post("/api/audit/tamper", dependencies=[Depends(require_admin)])
+    def tamper_audit(run_id: str | None = None) -> dict:
+        """Edit the oldest entry of a run, to show that it is detected.
+
+        Present only when DEMO_MODE=1, and requires the administrator token.
+        """
+        resolved = _resolve_run_id(run_id)
+        try:
+            return audit.tamper_with_oldest_event_for_demo(resolved)
+        except ValueError as error:
+            raise HTTPException(status_code=409, detail=str(error))
 
 
 @app.get("/")

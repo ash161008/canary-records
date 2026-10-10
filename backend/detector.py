@@ -19,6 +19,11 @@ Five jobs:
    per-session limits.
 5. **Owner lookup** by unique identifier only.
 
+``scan(text)`` is the gateway's single entry point: it prepares the text once
+and returns one ``ScanResult`` carrying the canary confidence, the matches,
+the personal items, their count and the truncation flag. ``find_canaries``
+and ``extract_personal`` remain available where only one half is wanted.
+
 NONE does not mean the content is safe. It means no registered decoy was
 found. Every other outbound policy still applies.
 
@@ -535,12 +540,21 @@ def find_canaries(text: str) -> Findings:
         return Findings()
 
     truncated = exceeds_scan_limit(text)
+    prepared = _prepare(text)[:MAX_INPUT_BYTES]
+    confidence, matches = _match_canaries(prepared)
+    return Findings(confidence=confidence, matches=matches, truncated=truncated)
 
+
+def _match_canaries(prepared: str) -> tuple[str, list[CanaryMatch]]:
+    """Match every active decoy against already-prepared text.
+
+    Split out so that ``scan`` can prepare the text once and run both the
+    canary match and the personal-item extraction over it.
+    """
     canaries = load_active_canaries()
     if not canaries:
-        return Findings(truncated=truncated)
+        return NONE, []
 
-    prepared = _prepare(text)[:MAX_INPUT_BYTES]
     indexes = [_TextIndex(prepared)]
     indexes.extend(_TextIndex(candidate) for candidate in decode_candidates(prepared))
 
@@ -582,10 +596,10 @@ def find_canaries(text: str) -> Findings:
             )
 
     if not matches:
-        return Findings(truncated=truncated)
+        return NONE, []
 
     confidence = STRONG if any(m.confidence == STRONG for m in matches) else WEAK
-    return Findings(confidence=confidence, matches=matches, truncated=truncated)
+    return confidence, matches
 
 
 # ---------------------------------------------------------------------------
@@ -619,7 +633,11 @@ def extract_personal(text: str) -> list[PersonalItem]:
     if not text:
         return []
 
-    source = _prepare(text)[:MAX_INPUT_BYTES]
+    return _extract_personal(_prepare(text)[:MAX_INPUT_BYTES])
+
+
+def _extract_personal(source: str) -> list[PersonalItem]:
+    """Extract personal items from already-prepared text."""
     items: list[PersonalItem] = []
     seen: set[tuple[str, str]] = set()
 
@@ -663,6 +681,83 @@ def extract_personal(text: str) -> list[PersonalItem]:
 def count_personal(text: str) -> int:
     """How many distinct personal items the content carries."""
     return len(extract_personal(text))
+
+
+# ---------------------------------------------------------------------------
+# One scan, one result
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ScanResult:
+    """Everything one pass over a piece of content found.
+
+    The gateway's single call site. ``truncated`` is the fail-closed signal:
+    when it is True only the first ``MAX_INPUT_BYTES`` were examined, so the
+    gateway must withhold a read result or hard-deny an outbound message
+    rather than trust ``confidence`` or ``personal_count``.
+    """
+
+    confidence: str = NONE
+    matches: list[CanaryMatch] = field(default_factory=list)
+    personal: list[PersonalItem] = field(default_factory=list)
+    truncated: bool = False
+
+    @property
+    def personal_count(self) -> int:
+        """Distinct personal items, for the per-message and session limits."""
+        return len(self.personal)
+
+    @property
+    def is_strong(self) -> bool:
+        return self.confidence == STRONG
+
+    @property
+    def is_weak(self) -> bool:
+        return self.confidence == WEAK
+
+    @property
+    def canary_ids(self) -> list[str]:
+        return [match.canary_id for match in self.matches]
+
+    @property
+    def locations(self) -> list[str]:
+        """Which files the matched decoys came from, for the alert."""
+        seen: list[str] = []
+        for match in self.matches:
+            if match.location not in seen:
+                seen.append(match.location)
+        return seen
+
+    @property
+    def fully_scanned(self) -> bool:
+        """False when the content was too large to examine in full."""
+        return not self.truncated
+
+
+def scan(text: str) -> ScanResult:
+    """Scan content once for decoys and personal data.
+
+    This is what the gateway calls: it normalises and truncates the text a
+    single time, then runs the canary match and the personal-item extraction
+    over the same prepared string, so the two can never disagree about what
+    was examined.
+    """
+    if not text:
+        return ScanResult()
+
+    truncated = exceeds_scan_limit(text)
+    prepared = _prepare(text)[:MAX_INPUT_BYTES]
+
+    confidence, matches = _match_canaries(prepared)
+    personal = _extract_personal(prepared)
+
+    return ScanResult(
+        confidence=confidence,
+        matches=matches,
+        personal=personal,
+        truncated=truncated,
+    )
 
 
 # ---------------------------------------------------------------------------

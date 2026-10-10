@@ -25,12 +25,13 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 6 of 18 is complete**: the
+This repository is being built in stages. **Stage 7 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
-the decoy seeder, and the detector. The gateway, the agents and the scenario
-suite are added in later stages, and the sections below will grow with them.
-Nothing in this README describes behaviour that does not yet run.
+the decoy seeder, the detector, and the tamper-evident audit log. The gateway,
+the agents and the scenario suite are added in later stages, and the sections
+below will grow with them. Nothing in this README describes behaviour that does
+not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -84,11 +85,16 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `POST` | `/api/workspace/unseed` | Remove every decoy and restore the originals. Admin. |
 | `GET` | `/api/workspace` | Record and file counts per location. |
 | `GET` | `/api/canaries` | The administrator's decoy map. Admin. |
+| `GET` | `/api/audit` | The audit log for a run, oldest first. |
+| `POST` | `/api/audit/verify` | Verify a run's chain; names the first broken entry. |
+| `POST` | `/api/audit/tamper` | Edit the oldest entry, to demonstrate detection. Admin, `DEMO_MODE=1` only. |
 
 Admin endpoints are not agent tools: they are absent from the gateway's tool
-list, so no agent can reach seeding or the decoy map however it is prompted.
-The `X-Admin-Token` requirement on them is added in Stage 9 with the rest of
-the admin surface.
+list, so no agent can reach seeding, the decoy map or the audit controls
+however it is prompted. `POST /api/audit/tamper` already requires the
+`X-Admin-Token` header, compared with `secrets.compare_digest`; it fails closed
+with 503 if `ADMIN_TOKEN` is unset on the server. Stage 9 applies the same
+requirement to the remaining admin endpoints.
 
 ## Project layout
 
@@ -119,6 +125,36 @@ not a sandbox, a separate process, a separate privilege domain, or filesystem
 permissions. Any backend code could be changed to add itself to that allowlist.
 A production version would put the registry behind a separate service with its
 own credentials. The full limitations list is written in Stage 17.
+
+### The audit log
+
+Every gateway decision and administrator action is appended to a hash-chained
+log, one chain per demo run. Each entry's SHA-256 fingerprint covers its own
+fields plus the previous entry's fingerprint, so editing a stored value
+invalidates that entry and every entry after it, and `POST /api/audit/verify`
+reports exactly which entry broke and why.
+
+**This is not a blockchain.** There is no network, no consensus and no
+distribution; it is a local hash chain. Its guarantee is correspondingly
+modest: it makes an edit *detectable* by a trusted verifier. Anyone able to
+rewrite the whole table could recompute every fingerprint.
+
+**What the log holds, and what it does not.** Entries record decisions, rules,
+reasons, decoy ids and resource references — never file contents. An entry says
+that `workspace/customers/customer_contacts.csv` was quarantined and which
+decoy ids were involved, not what the file said, so confidential data cannot be
+read back out of the log.
+
+**The log is not anonymous.** A resource reference, a decoy id or a session id
+can still be linked back to a person — the decoy registry maps a decoy id to a
+specific planted record, and a file-and-row reference identifies one customer.
+Treat the audit log as personal data in its own right: it tells you who was
+involved, not merely that something happened.
+
+`POST /api/audit/tamper` deliberately edits the oldest entry of a run so the
+demo can show detection working. It exists only when `DEMO_MODE=1`, requires
+the administrator token, and records the tampering as a new entry naming the
+run and the entry it edited.
 
 ### Detector limitations
 
