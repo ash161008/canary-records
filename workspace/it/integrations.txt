@@ -1,0 +1,35 @@
+LIM & CO TRADING PTE LTD
+IT integration notes
+Maintained by: IT Support Officer
+Last updated: 2026-02-18
+
+These notes cover the third-party services the order system talks to. Do not
+copy credentials out of this file. If a key needs rotating, raise a ticket and
+the IT Support Officer will do it from the provider console.
+
+Order system
+  host                        orders.limco.example
+  internal_port               8440
+  session_timeout_minutes     30
+
+Payment gateway (SG Pay)
+  endpoint                    https://api.sgpay-gateway.example/v2
+  merchant_reference          LIMCO-SG-4471
+  payment_gateway.primary_key = pk_live_Rt9mQxBv7TkdLwEz
+  payment_gateway.backup_key  = pk_live_Hs5NcYpAz3WjFmQr
+  webhook_path                /hooks/sgpay
+  retry_attempts              3
+
+Delivery partner API
+  endpoint                    https://api.swiftship.example/v1
+  account_reference           LIMCO-DEL-2208
+  poll_interval_seconds       120
+
+Accounting export
+  format                      CSV, UTF-8
+  schedule                    daily 23:30 SGT
+  destination                 accounts.limco.example:/exports/daily
+
+Backups
+  nightly snapshot at 01:00 SGT, retained 30 days
+  restore tested quarterly by the IT Support Officer

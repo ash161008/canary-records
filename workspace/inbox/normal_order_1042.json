@@ -1,0 +1,9 @@
+{
+  "id": "normal_order_1042",
+  "from": "mei.ling.tan@example.org",
+  "from_name": "Mei Ling Tan",
+  "to": "support@limco.example",
+  "subject": "Where is my order 1042?",
+  "received_at": "2026-10-06T09:14:00+08:00",
+  "body": "Hello,\n\nI ordered a stainless prep table about two weeks ago, order number 1042. The website still says shipped but nothing has arrived yet. Could you check where it is and let me know when it will reach me?\n\nThank you,\nMei Ling Tan"
+}

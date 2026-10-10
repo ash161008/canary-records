@@ -1,0 +1,3202 @@
+[
+  {
+    "order_number": 1590,
+    "customer_id": "C32838",
+    "item": "Safety helmet with visor",
+    "amount": 103.5,
+    "status": "delivered",
+    "date": "2026-09-28"
+  },
+  {
+    "order_number": 1527,
+    "customer_id": "C18968",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 420.0,
+    "status": "shipped",
+    "date": "2026-08-30"
+  },
+  {
+    "order_number": 1540,
+    "customer_id": "C56457",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "processing",
+    "date": "2026-08-31"
+  },
+  {
+    "order_number": 1564,
+    "customer_id": "C47072",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1460.0,
+    "status": "delivered",
+    "date": "2026-09-12"
+  },
+  {
+    "order_number": 1380,
+    "customer_id": "C74441",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "delivered",
+    "date": "2026-06-26"
+  },
+  {
+    "order_number": 1578,
+    "customer_id": "C92667",
+    "item": "Wall-mounted hand dryer",
+    "amount": 645.0,
+    "status": "delivered",
+    "date": "2026-09-13"
+  },
+  {
+    "order_number": 1006,
+    "customer_id": "C70305",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "delivered",
+    "date": "2026-01-06"
+  },
+  {
+    "order_number": 1311,
+    "customer_id": "C83147",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "processing",
+    "date": "2026-05-18"
+  },
+  {
+    "order_number": 1036,
+    "customer_id": "C39135",
+    "item": "Folding banquet table 6ft",
+    "amount": 426.0,
+    "status": "shipped",
+    "date": "2026-01-17"
+  },
+  {
+    "order_number": 1059,
+    "customer_id": "C70423",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "delivered",
+    "date": "2026-02-01"
+  },
+  {
+    "order_number": 1288,
+    "customer_id": "C84349",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 390.0,
+    "status": "pending_payment",
+    "date": "2026-05-07"
+  },
+  {
+    "order_number": 1271,
+    "customer_id": "C17212",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "processing",
+    "date": "2026-04-30"
+  },
+  {
+    "order_number": 1498,
+    "customer_id": "C37973",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "delivered",
+    "date": "2026-08-15"
+  },
+  {
+    "order_number": 1253,
+    "customer_id": "C93665",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-04-26"
+  },
+  {
+    "order_number": 1236,
+    "customer_id": "C53642",
+    "item": "Folding banquet table 6ft",
+    "amount": 426.0,
+    "status": "delivered",
+    "date": "2026-04-13"
+  },
+  {
+    "order_number": 1208,
+    "customer_id": "C71141",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "processing",
+    "date": "2026-04-07"
+  },
+  {
+    "order_number": 1537,
+    "customer_id": "C88644",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 675.0,
+    "status": "pending_payment",
+    "date": "2026-08-25"
+  },
+  {
+    "order_number": 1268,
+    "customer_id": "C67340",
+    "item": "LED ceiling panel 600x600",
+    "amount": 85.0,
+    "status": "delivered",
+    "date": "2026-05-04"
+  },
+  {
+    "order_number": 1366,
+    "customer_id": "C27392",
+    "item": "Barcode scanner handheld",
+    "amount": 402.0,
+    "status": "delivered",
+    "date": "2026-06-18"
+  },
+  {
+    "order_number": 1365,
+    "customer_id": "C58816",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "shipped",
+    "date": "2026-06-20"
+  },
+  {
+    "order_number": 1359,
+    "customer_id": "C57843",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 93.0,
+    "status": "shipped",
+    "date": "2026-06-08"
+  },
+  {
+    "order_number": 1001,
+    "customer_id": "C67896",
+    "item": "Air circulator pedestal fan",
+    "amount": 534.0,
+    "status": "delivered",
+    "date": "2026-01-01"
+  },
+  {
+    "order_number": 1221,
+    "customer_id": "C25213",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "shipped",
+    "date": "2026-04-13"
+  },
+  {
+    "order_number": 1574,
+    "customer_id": "C80305",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "delivered",
+    "date": "2026-09-22"
+  },
+  {
+    "order_number": 1557,
+    "customer_id": "C87833",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 192.0,
+    "status": "pending_payment",
+    "date": "2026-09-08"
+  },
+  {
+    "order_number": 1364,
+    "customer_id": "C72071",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "shipped",
+    "date": "2026-06-19"
+  },
+  {
+    "order_number": 1484,
+    "customer_id": "C32983",
+    "item": "Shrink wrap dispenser",
+    "amount": 192.0,
+    "status": "cancelled",
+    "date": "2026-08-01"
+  },
+  {
+    "order_number": 1216,
+    "customer_id": "C72204",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "delivered",
+    "date": "2026-04-06"
+  },
+  {
+    "order_number": 1439,
+    "customer_id": "C93611",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "delivered",
+    "date": "2026-07-14"
+  },
+  {
+    "order_number": 1399,
+    "customer_id": "C64459",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "shipped",
+    "date": "2026-06-26"
+  },
+  {
+    "order_number": 1450,
+    "customer_id": "C29340",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "delivered",
+    "date": "2026-07-17"
+  },
+  {
+    "order_number": 1045,
+    "customer_id": "C80345",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-01-18"
+  },
+  {
+    "order_number": 1495,
+    "customer_id": "C89569",
+    "item": "Stackable plastic chair",
+    "amount": 92.0,
+    "status": "delivered",
+    "date": "2026-08-10"
+  },
+  {
+    "order_number": 1520,
+    "customer_id": "C17355",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 1890.0,
+    "status": "delivered",
+    "date": "2026-08-24"
+  },
+  {
+    "order_number": 1398,
+    "customer_id": "C96765",
+    "item": "Thermal receipt printer",
+    "amount": 1760.0,
+    "status": "delivered",
+    "date": "2026-07-04"
+  },
+  {
+    "order_number": 1002,
+    "customer_id": "C26426",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "cancelled",
+    "date": "2026-01-04"
+  },
+  {
+    "order_number": 1168,
+    "customer_id": "C64874",
+    "item": "Digital platform scale 150kg",
+    "amount": 735.0,
+    "status": "shipped",
+    "date": "2026-03-23"
+  },
+  {
+    "order_number": 1461,
+    "customer_id": "C52762",
+    "item": "Thermal receipt printer",
+    "amount": 352.0,
+    "status": "processing",
+    "date": "2026-08-02"
+  },
+  {
+    "order_number": 1264,
+    "customer_id": "C42990",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 894.0,
+    "status": "delivered",
+    "date": "2026-05-01"
+  },
+  {
+    "order_number": 1494,
+    "customer_id": "C86064",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "shipped",
+    "date": "2026-08-05"
+  },
+  {
+    "order_number": 1394,
+    "customer_id": "C79946",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "cancelled",
+    "date": "2026-06-30"
+  },
+  {
+    "order_number": 1466,
+    "customer_id": "C76248",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-08-01"
+  },
+  {
+    "order_number": 1419,
+    "customer_id": "C83005",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "delivered",
+    "date": "2026-07-08"
+  },
+  {
+    "order_number": 1250,
+    "customer_id": "C54676",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 378.0,
+    "status": "pending_payment",
+    "date": "2026-04-20"
+  },
+  {
+    "order_number": 1016,
+    "customer_id": "C44387",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "processing",
+    "date": "2026-01-03"
+  },
+  {
+    "order_number": 1070,
+    "customer_id": "C48504",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "shipped",
+    "date": "2026-02-06"
+  },
+  {
+    "order_number": 1030,
+    "customer_id": "C90750",
+    "item": "Thermal receipt printer",
+    "amount": 352.0,
+    "status": "delivered",
+    "date": "2026-01-10"
+  },
+  {
+    "order_number": 1029,
+    "customer_id": "C74752",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 384.0,
+    "status": "delivered",
+    "date": "2026-01-15"
+  },
+  {
+    "order_number": 1535,
+    "customer_id": "C15100",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "pending_payment",
+    "date": "2026-08-28"
+  },
+  {
+    "order_number": 1519,
+    "customer_id": "C97796",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 740.0,
+    "status": "pending_payment",
+    "date": "2026-08-18"
+  },
+  {
+    "order_number": 1138,
+    "customer_id": "C29340",
+    "item": "LED ceiling panel 600x600",
+    "amount": 170.0,
+    "status": "delivered",
+    "date": "2026-03-08"
+  },
+  {
+    "order_number": 1512,
+    "customer_id": "C70036",
+    "item": "LED ceiling panel 600x600",
+    "amount": 425.0,
+    "status": "delivered",
+    "date": "2026-08-20"
+  },
+  {
+    "order_number": 1511,
+    "customer_id": "C53642",
+    "item": "Digital platform scale 150kg",
+    "amount": 980.0,
+    "status": "shipped",
+    "date": "2026-08-13"
+  },
+  {
+    "order_number": 1496,
+    "customer_id": "C97835",
+    "item": "Stainless prep table 1.5m",
+    "amount": 730.0,
+    "status": "delivered",
+    "date": "2026-08-18"
+  },
+  {
+    "order_number": 1117,
+    "customer_id": "C68598",
+    "item": "Cordless drill kit 18V",
+    "amount": 316.0,
+    "status": "shipped",
+    "date": "2026-02-25"
+  },
+  {
+    "order_number": 1352,
+    "customer_id": "C46002",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "delivered",
+    "date": "2026-06-07"
+  },
+  {
+    "order_number": 1032,
+    "customer_id": "C74752",
+    "item": "Non-slip floor mat roll",
+    "amount": 224.0,
+    "status": "shipped",
+    "date": "2026-01-11"
+  },
+  {
+    "order_number": 1080,
+    "customer_id": "C89829",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "processing",
+    "date": "2026-01-30"
+  },
+  {
+    "order_number": 1209,
+    "customer_id": "C60556",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1460.0,
+    "status": "delivered",
+    "date": "2026-04-10"
+  },
+  {
+    "order_number": 1079,
+    "customer_id": "C30036",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "shipped",
+    "date": "2026-02-01"
+  },
+  {
+    "order_number": 1529,
+    "customer_id": "C67896",
+    "item": "Folding banquet table 6ft",
+    "amount": 284.0,
+    "status": "delivered",
+    "date": "2026-09-01"
+  },
+  {
+    "order_number": 1456,
+    "customer_id": "C87860",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "pending_payment",
+    "date": "2026-07-29"
+  },
+  {
+    "order_number": 1302,
+    "customer_id": "C83147",
+    "item": "Folding banquet table 6ft",
+    "amount": 284.0,
+    "status": "delivered",
+    "date": "2026-05-12"
+  },
+  {
+    "order_number": 1347,
+    "customer_id": "C43540",
+    "item": "Cordless drill kit 18V",
+    "amount": 316.0,
+    "status": "delivered",
+    "date": "2026-06-10"
+  },
+  {
+    "order_number": 1588,
+    "customer_id": "C64459",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 444.0,
+    "status": "delivered",
+    "date": "2026-09-20"
+  },
+  {
+    "order_number": 1270,
+    "customer_id": "C52762",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "delivered",
+    "date": "2026-04-28"
+  },
+  {
+    "order_number": 1282,
+    "customer_id": "C26315",
+    "item": "Stackable plastic chair",
+    "amount": 69.0,
+    "status": "processing",
+    "date": "2026-05-03"
+  },
+  {
+    "order_number": 1322,
+    "customer_id": "C51049",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1095.0,
+    "status": "delivered",
+    "date": "2026-05-31"
+  },
+  {
+    "order_number": 1446,
+    "customer_id": "C50250",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "shipped",
+    "date": "2026-07-26"
+  },
+  {
+    "order_number": 1454,
+    "customer_id": "C78564",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "shipped",
+    "date": "2026-07-29"
+  },
+  {
+    "order_number": 1503,
+    "customer_id": "C92978",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 4200.0,
+    "status": "processing",
+    "date": "2026-08-09"
+  },
+  {
+    "order_number": 1417,
+    "customer_id": "C92978",
+    "item": "Digital platform scale 150kg",
+    "amount": 1470.0,
+    "status": "delivered",
+    "date": "2026-07-02"
+  },
+  {
+    "order_number": 1533,
+    "customer_id": "C61518",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-08-31"
+  },
+  {
+    "order_number": 1206,
+    "customer_id": "C25213",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "delivered",
+    "date": "2026-04-06"
+  },
+  {
+    "order_number": 1554,
+    "customer_id": "C44387",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "shipped",
+    "date": "2026-09-05"
+  },
+  {
+    "order_number": 1553,
+    "customer_id": "C54657",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "delivered",
+    "date": "2026-09-07"
+  },
+  {
+    "order_number": 1037,
+    "customer_id": "C39135",
+    "item": "Thermal receipt printer",
+    "amount": 352.0,
+    "status": "delivered",
+    "date": "2026-01-18"
+  },
+  {
+    "order_number": 1112,
+    "customer_id": "C23425",
+    "item": "Thermal receipt printer",
+    "amount": 352.0,
+    "status": "delivered",
+    "date": "2026-02-24"
+  },
+  {
+    "order_number": 1093,
+    "customer_id": "C80236",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "delivered",
+    "date": "2026-02-14"
+  },
+  {
+    "order_number": 1103,
+    "customer_id": "C86064",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "delivered",
+    "date": "2026-02-19"
+  },
+  {
+    "order_number": 1291,
+    "customer_id": "C15593",
+    "item": "Non-slip floor mat roll",
+    "amount": 336.0,
+    "status": "delivered",
+    "date": "2026-05-09"
+  },
+  {
+    "order_number": 1437,
+    "customer_id": "C91156",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "processing",
+    "date": "2026-07-21"
+  },
+  {
+    "order_number": 1180,
+    "customer_id": "C17553",
+    "item": "Thermal receipt printer",
+    "amount": 1056.0,
+    "status": "delivered",
+    "date": "2026-03-16"
+  },
+  {
+    "order_number": 1474,
+    "customer_id": "C77300",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "processing",
+    "date": "2026-07-30"
+  },
+  {
+    "order_number": 1432,
+    "customer_id": "C41147",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "delivered",
+    "date": "2026-07-10"
+  },
+  {
+    "order_number": 1348,
+    "customer_id": "C45554",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 256.0,
+    "status": "shipped",
+    "date": "2026-06-11"
+  },
+  {
+    "order_number": 1517,
+    "customer_id": "C77466",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "shipped",
+    "date": "2026-08-22"
+  },
+  {
+    "order_number": 1136,
+    "customer_id": "C65028",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "processing",
+    "date": "2026-03-07"
+  },
+  {
+    "order_number": 1424,
+    "customer_id": "C59921",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 420.0,
+    "status": "processing",
+    "date": "2026-07-14"
+  },
+  {
+    "order_number": 1171,
+    "customer_id": "C11854",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "delivered",
+    "date": "2026-03-24"
+  },
+  {
+    "order_number": 1102,
+    "customer_id": "C43029",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "shipped",
+    "date": "2026-02-12"
+  },
+  {
+    "order_number": 1182,
+    "customer_id": "C59391",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "shipped",
+    "date": "2026-03-23"
+  },
+  {
+    "order_number": 1239,
+    "customer_id": "C18968",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "pending_payment",
+    "date": "2026-04-14"
+  },
+  {
+    "order_number": 1194,
+    "customer_id": "C91156",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "pending_payment",
+    "date": "2026-03-26"
+  },
+  {
+    "order_number": 1074,
+    "customer_id": "C11007",
+    "item": "Insulated food carrier 20L",
+    "amount": 348.0,
+    "status": "delivered",
+    "date": "2026-02-06"
+  },
+  {
+    "order_number": 1040,
+    "customer_id": "C75410",
+    "item": "Thermal receipt printer",
+    "amount": 1056.0,
+    "status": "delivered",
+    "date": "2026-01-20"
+  },
+  {
+    "order_number": 1536,
+    "customer_id": "C70036",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-08-29"
+  },
+  {
+    "order_number": 1256,
+    "customer_id": "C47629",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "processing",
+    "date": "2026-04-27"
+  },
+  {
+    "order_number": 1325,
+    "customer_id": "C32983",
+    "item": "Wall-mounted hand dryer",
+    "amount": 2150.0,
+    "status": "delivered",
+    "date": "2026-05-28"
+  },
+  {
+    "order_number": 1481,
+    "customer_id": "C70956",
+    "item": "Cordless drill kit 18V",
+    "amount": 474.0,
+    "status": "delivered",
+    "date": "2026-08-07"
+  },
+  {
+    "order_number": 1354,
+    "customer_id": "C17398",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "delivered",
+    "date": "2026-06-09"
+  },
+  {
+    "order_number": 1571,
+    "customer_id": "C15326",
+    "item": "Stainless prep table 1.5m",
+    "amount": 730.0,
+    "status": "cancelled",
+    "date": "2026-09-08"
+  },
+  {
+    "order_number": 1292,
+    "customer_id": "C22739",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-05-10"
+  },
+  {
+    "order_number": 1430,
+    "customer_id": "C51079",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "shipped",
+    "date": "2026-07-09"
+  },
+  {
+    "order_number": 1020,
+    "customer_id": "C48462",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "processing",
+    "date": "2026-01-13"
+  },
+  {
+    "order_number": 1587,
+    "customer_id": "C52778",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "pending_payment",
+    "date": "2026-09-17"
+  },
+  {
+    "order_number": 1265,
+    "customer_id": "C22739",
+    "item": "Cordless drill kit 18V",
+    "amount": 316.0,
+    "status": "delivered",
+    "date": "2026-04-28"
+  },
+  {
+    "order_number": 1333,
+    "customer_id": "C76507",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 894.0,
+    "status": "shipped",
+    "date": "2026-06-03"
+  },
+  {
+    "order_number": 1153,
+    "customer_id": "C31298",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "pending_payment",
+    "date": "2026-03-11"
+  },
+  {
+    "order_number": 1255,
+    "customer_id": "C80190",
+    "item": "Cordless drill kit 18V",
+    "amount": 474.0,
+    "status": "shipped",
+    "date": "2026-04-26"
+  },
+  {
+    "order_number": 1324,
+    "customer_id": "C30214",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-05-20"
+  },
+  {
+    "order_number": 1451,
+    "customer_id": "C23256",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 378.0,
+    "status": "delivered",
+    "date": "2026-07-27"
+  },
+  {
+    "order_number": 1211,
+    "customer_id": "C96870",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "delivered",
+    "date": "2026-04-09"
+  },
+  {
+    "order_number": 1465,
+    "customer_id": "C81786",
+    "item": "LED ceiling panel 600x600",
+    "amount": 85.0,
+    "status": "pending_payment",
+    "date": "2026-07-28"
+  },
+  {
+    "order_number": 1062,
+    "customer_id": "C11854",
+    "item": "Folding banquet table 6ft",
+    "amount": 852.0,
+    "status": "shipped",
+    "date": "2026-01-27"
+  },
+  {
+    "order_number": 1581,
+    "customer_id": "C83242",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "pending_payment",
+    "date": "2026-09-14"
+  },
+  {
+    "order_number": 1457,
+    "customer_id": "C69905",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 93.0,
+    "status": "shipped",
+    "date": "2026-07-29"
+  },
+  {
+    "order_number": 1058,
+    "customer_id": "C29126",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 298.0,
+    "status": "delivered",
+    "date": "2026-01-27"
+  },
+  {
+    "order_number": 1411,
+    "customer_id": "C91987",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "processing",
+    "date": "2026-07-06"
+  },
+  {
+    "order_number": 1514,
+    "customer_id": "C17780",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "shipped",
+    "date": "2026-08-25"
+  },
+  {
+    "order_number": 1326,
+    "customer_id": "C17398",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 256.0,
+    "status": "pending_payment",
+    "date": "2026-05-30"
+  },
+  {
+    "order_number": 1489,
+    "customer_id": "C69441",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "shipped",
+    "date": "2026-08-04"
+  },
+  {
+    "order_number": 1238,
+    "customer_id": "C36651",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 298.0,
+    "status": "pending_payment",
+    "date": "2026-04-17"
+  },
+  {
+    "order_number": 1299,
+    "customer_id": "C12192",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-05-16"
+  },
+  {
+    "order_number": 1254,
+    "customer_id": "C15513",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "cancelled",
+    "date": "2026-04-28"
+  },
+  {
+    "order_number": 1308,
+    "customer_id": "C80190",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "delivered",
+    "date": "2026-05-23"
+  },
+  {
+    "order_number": 1257,
+    "customer_id": "C64140",
+    "item": "Wall-mounted hand dryer",
+    "amount": 430.0,
+    "status": "shipped",
+    "date": "2026-04-29"
+  },
+  {
+    "order_number": 1084,
+    "customer_id": "C24790",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "delivered",
+    "date": "2026-02-08"
+  },
+  {
+    "order_number": 1563,
+    "customer_id": "C47649",
+    "item": "Thermal receipt printer",
+    "amount": 528.0,
+    "status": "delivered",
+    "date": "2026-09-14"
+  },
+  {
+    "order_number": 1534,
+    "customer_id": "C56961",
+    "item": "Safety helmet with visor",
+    "amount": 345.0,
+    "status": "pending_payment",
+    "date": "2026-08-28"
+  },
+  {
+    "order_number": 1124,
+    "customer_id": "C49862",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "delivered",
+    "date": "2026-03-02"
+  },
+  {
+    "order_number": 1597,
+    "customer_id": "C96223",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "processing",
+    "date": "2026-09-28"
+  },
+  {
+    "order_number": 1212,
+    "customer_id": "C61007",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "cancelled",
+    "date": "2026-04-09"
+  },
+  {
+    "order_number": 1422,
+    "customer_id": "C40595",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "pending_payment",
+    "date": "2026-07-05"
+  },
+  {
+    "order_number": 1516,
+    "customer_id": "C57826",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 840.0,
+    "status": "cancelled",
+    "date": "2026-08-23"
+  },
+  {
+    "order_number": 1243,
+    "customer_id": "C62044",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-04-16"
+  },
+  {
+    "order_number": 1545,
+    "customer_id": "C77300",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "shipped",
+    "date": "2026-09-04"
+  },
+  {
+    "order_number": 1374,
+    "customer_id": "C43540",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-06-21"
+  },
+  {
+    "order_number": 1490,
+    "customer_id": "C35863",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "shipped",
+    "date": "2026-08-13"
+  },
+  {
+    "order_number": 1039,
+    "customer_id": "C70036",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 156.0,
+    "status": "processing",
+    "date": "2026-01-18"
+  },
+  {
+    "order_number": 1547,
+    "customer_id": "C54089",
+    "item": "Safety helmet with visor",
+    "amount": 345.0,
+    "status": "shipped",
+    "date": "2026-09-07"
+  },
+  {
+    "order_number": 1332,
+    "customer_id": "C66272",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-05-26"
+  },
+  {
+    "order_number": 1293,
+    "customer_id": "C43640",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "delivered",
+    "date": "2026-05-14"
+  },
+  {
+    "order_number": 1132,
+    "customer_id": "C17780",
+    "item": "Air circulator pedestal fan",
+    "amount": 356.0,
+    "status": "pending_payment",
+    "date": "2026-03-02"
+  },
+  {
+    "order_number": 1314,
+    "customer_id": "C11044",
+    "item": "Thermal receipt printer",
+    "amount": 352.0,
+    "status": "processing",
+    "date": "2026-05-25"
+  },
+  {
+    "order_number": 1462,
+    "customer_id": "C96577",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "pending_payment",
+    "date": "2026-08-01"
+  },
+  {
+    "order_number": 1241,
+    "customer_id": "C44620",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 234.0,
+    "status": "delivered",
+    "date": "2026-04-15"
+  },
+  {
+    "order_number": 1416,
+    "customer_id": "C22571",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "delivered",
+    "date": "2026-07-12"
+  },
+  {
+    "order_number": 1172,
+    "customer_id": "C83147",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 93.0,
+    "status": "delivered",
+    "date": "2026-03-15"
+  },
+  {
+    "order_number": 1207,
+    "customer_id": "C28035",
+    "item": "Stackable plastic chair",
+    "amount": 46.0,
+    "status": "cancelled",
+    "date": "2026-04-03"
+  },
+  {
+    "order_number": 1323,
+    "customer_id": "C47346",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "processing",
+    "date": "2026-05-24"
+  },
+  {
+    "order_number": 1173,
+    "customer_id": "C61518",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "cancelled",
+    "date": "2026-03-21"
+  },
+  {
+    "order_number": 1357,
+    "customer_id": "C76248",
+    "item": "Barcode scanner handheld",
+    "amount": 402.0,
+    "status": "delivered",
+    "date": "2026-06-14"
+  },
+  {
+    "order_number": 1356,
+    "customer_id": "C52778",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "delivered",
+    "date": "2026-06-05"
+  },
+  {
+    "order_number": 1135,
+    "customer_id": "C53007",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "pending_payment",
+    "date": "2026-03-04"
+  },
+  {
+    "order_number": 1217,
+    "customer_id": "C15100",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 298.0,
+    "status": "delivered",
+    "date": "2026-04-06"
+  },
+  {
+    "order_number": 1008,
+    "customer_id": "C98542",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-01-01"
+  },
+  {
+    "order_number": 1468,
+    "customer_id": "C73532",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "shipped",
+    "date": "2026-08-01"
+  },
+  {
+    "order_number": 1595,
+    "customer_id": "C40508",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1095.0,
+    "status": "processing",
+    "date": "2026-09-20"
+  },
+  {
+    "order_number": 1043,
+    "customer_id": "C28449",
+    "item": "Stackable plastic chair",
+    "amount": 46.0,
+    "status": "delivered",
+    "date": "2026-01-24"
+  },
+  {
+    "order_number": 1402,
+    "customer_id": "C23979",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "processing",
+    "date": "2026-07-02"
+  },
+  {
+    "order_number": 1027,
+    "customer_id": "C94853",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "delivered",
+    "date": "2026-01-11"
+  },
+  {
+    "order_number": 1035,
+    "customer_id": "C63736",
+    "item": "Wall-mounted hand dryer",
+    "amount": 2150.0,
+    "status": "delivered",
+    "date": "2026-01-20"
+  },
+  {
+    "order_number": 1515,
+    "customer_id": "C23256",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "cancelled",
+    "date": "2026-08-16"
+  },
+  {
+    "order_number": 1334,
+    "customer_id": "C28035",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 576.0,
+    "status": "processing",
+    "date": "2026-05-26"
+  },
+  {
+    "order_number": 1096,
+    "customer_id": "C83147",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 78.0,
+    "status": "cancelled",
+    "date": "2026-02-07"
+  },
+  {
+    "order_number": 1523,
+    "customer_id": "C82733",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 2070.0,
+    "status": "processing",
+    "date": "2026-08-29"
+  },
+  {
+    "order_number": 1423,
+    "customer_id": "C67807",
+    "item": "Folding banquet table 6ft",
+    "amount": 852.0,
+    "status": "delivered",
+    "date": "2026-07-10"
+  },
+  {
+    "order_number": 1500,
+    "customer_id": "C43540",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "delivered",
+    "date": "2026-08-14"
+  },
+  {
+    "order_number": 1346,
+    "customer_id": "C96577",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "processing",
+    "date": "2026-06-11"
+  },
+  {
+    "order_number": 1596,
+    "customer_id": "C89570",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 567.0,
+    "status": "processing",
+    "date": "2026-09-20"
+  },
+  {
+    "order_number": 1407,
+    "customer_id": "C80981",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 222.0,
+    "status": "cancelled",
+    "date": "2026-07-04"
+  },
+  {
+    "order_number": 1142,
+    "customer_id": "C22245",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 420.0,
+    "status": "shipped",
+    "date": "2026-02-27"
+  },
+  {
+    "order_number": 1530,
+    "customer_id": "C46002",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "shipped",
+    "date": "2026-08-28"
+  },
+  {
+    "order_number": 1038,
+    "customer_id": "C87537",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "processing",
+    "date": "2026-01-20"
+  },
+  {
+    "order_number": 1157,
+    "customer_id": "C15513",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "pending_payment",
+    "date": "2026-03-17"
+  },
+  {
+    "order_number": 1491,
+    "customer_id": "C99709",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "cancelled",
+    "date": "2026-08-11"
+  },
+  {
+    "order_number": 1591,
+    "customer_id": "C17212",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "processing",
+    "date": "2026-09-20"
+  },
+  {
+    "order_number": 1476,
+    "customer_id": "C31298",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "shipped",
+    "date": "2026-08-02"
+  },
+  {
+    "order_number": 1233,
+    "customer_id": "C82733",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 384.0,
+    "status": "pending_payment",
+    "date": "2026-04-12"
+  },
+  {
+    "order_number": 1143,
+    "customer_id": "C31298",
+    "item": "Air circulator pedestal fan",
+    "amount": 890.0,
+    "status": "delivered",
+    "date": "2026-03-02"
+  },
+  {
+    "order_number": 1150,
+    "customer_id": "C52762",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 840.0,
+    "status": "cancelled",
+    "date": "2026-03-06"
+  },
+  {
+    "order_number": 1048,
+    "customer_id": "C86064",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "delivered",
+    "date": "2026-01-25"
+  },
+  {
+    "order_number": 1017,
+    "customer_id": "C89736",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "delivered",
+    "date": "2026-01-08"
+  },
+  {
+    "order_number": 1294,
+    "customer_id": "C87860",
+    "item": "Digital platform scale 150kg",
+    "amount": 2450.0,
+    "status": "shipped",
+    "date": "2026-05-15"
+  },
+  {
+    "order_number": 1565,
+    "customer_id": "C93816",
+    "item": "Shrink wrap dispenser",
+    "amount": 192.0,
+    "status": "delivered",
+    "date": "2026-09-17"
+  },
+  {
+    "order_number": 1415,
+    "customer_id": "C23979",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-07-07"
+  },
+  {
+    "order_number": 1586,
+    "customer_id": "C43640",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 894.0,
+    "status": "processing",
+    "date": "2026-09-27"
+  },
+  {
+    "order_number": 1120,
+    "customer_id": "C96870",
+    "item": "Stackable plastic chair",
+    "amount": 69.0,
+    "status": "cancelled",
+    "date": "2026-02-17"
+  },
+  {
+    "order_number": 1144,
+    "customer_id": "C76935",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "shipped",
+    "date": "2026-03-01"
+  },
+  {
+    "order_number": 1577,
+    "customer_id": "C46666",
+    "item": "Air circulator pedestal fan",
+    "amount": 356.0,
+    "status": "delivered",
+    "date": "2026-09-15"
+  },
+  {
+    "order_number": 1242,
+    "customer_id": "C57826",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "processing",
+    "date": "2026-04-20"
+  },
+  {
+    "order_number": 1425,
+    "customer_id": "C41816",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 4200.0,
+    "status": "shipped",
+    "date": "2026-07-07"
+  },
+  {
+    "order_number": 1235,
+    "customer_id": "C90584",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "delivered",
+    "date": "2026-04-18"
+  },
+  {
+    "order_number": 1201,
+    "customer_id": "C82970",
+    "item": "Cordless drill kit 18V",
+    "amount": 316.0,
+    "status": "shipped",
+    "date": "2026-04-07"
+  },
+  {
+    "order_number": 1106,
+    "customer_id": "C13280",
+    "item": "Thermal receipt printer",
+    "amount": 1056.0,
+    "status": "cancelled",
+    "date": "2026-02-15"
+  },
+  {
+    "order_number": 1162,
+    "customer_id": "C89736",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "shipped",
+    "date": "2026-03-14"
+  },
+  {
+    "order_number": 1589,
+    "customer_id": "C62044",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "processing",
+    "date": "2026-09-26"
+  },
+  {
+    "order_number": 1475,
+    "customer_id": "C39473",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "delivered",
+    "date": "2026-08-06"
+  },
+  {
+    "order_number": 1066,
+    "customer_id": "C87860",
+    "item": "Shrink wrap dispenser",
+    "amount": 144.0,
+    "status": "shipped",
+    "date": "2026-02-04"
+  },
+  {
+    "order_number": 1225,
+    "customer_id": "C91631",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 1380.0,
+    "status": "shipped",
+    "date": "2026-04-10"
+  },
+  {
+    "order_number": 1192,
+    "customer_id": "C96577",
+    "item": "Barcode scanner handheld",
+    "amount": 402.0,
+    "status": "delivered",
+    "date": "2026-03-25"
+  },
+  {
+    "order_number": 1189,
+    "customer_id": "C31319",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-03-30"
+  },
+  {
+    "order_number": 1228,
+    "customer_id": "C32050",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "cancelled",
+    "date": "2026-04-13"
+  },
+  {
+    "order_number": 1375,
+    "customer_id": "C49862",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "shipped",
+    "date": "2026-06-17"
+  },
+  {
+    "order_number": 1269,
+    "customer_id": "C97835",
+    "item": "LED ceiling panel 600x600",
+    "amount": 85.0,
+    "status": "delivered",
+    "date": "2026-05-06"
+  },
+  {
+    "order_number": 1222,
+    "customer_id": "C15100",
+    "item": "Barcode scanner handheld",
+    "amount": 536.0,
+    "status": "processing",
+    "date": "2026-04-14"
+  },
+  {
+    "order_number": 1369,
+    "customer_id": "C50250",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "delivered",
+    "date": "2026-06-09"
+  },
+  {
+    "order_number": 1488,
+    "customer_id": "C60242",
+    "item": "Non-slip floor mat roll",
+    "amount": 672.0,
+    "status": "delivered",
+    "date": "2026-08-03"
+  },
+  {
+    "order_number": 1266,
+    "customer_id": "C67896",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "shipped",
+    "date": "2026-05-03"
+  },
+  {
+    "order_number": 1499,
+    "customer_id": "C59131",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 596.0,
+    "status": "delivered",
+    "date": "2026-08-09"
+  },
+  {
+    "order_number": 1042,
+    "customer_id": "C80236",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "shipped",
+    "date": "2026-09-22"
+  },
+  {
+    "order_number": 1372,
+    "customer_id": "C56961",
+    "item": "LED ceiling panel 600x600",
+    "amount": 255.0,
+    "status": "processing",
+    "date": "2026-06-12"
+  },
+  {
+    "order_number": 1199,
+    "customer_id": "C84349",
+    "item": "Air circulator pedestal fan",
+    "amount": 356.0,
+    "status": "pending_payment",
+    "date": "2026-04-01"
+  },
+  {
+    "order_number": 1160,
+    "customer_id": "C57843",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 384.0,
+    "status": "cancelled",
+    "date": "2026-03-17"
+  },
+  {
+    "order_number": 1279,
+    "customer_id": "C58816",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 1280.0,
+    "status": "delivered",
+    "date": "2026-05-02"
+  },
+  {
+    "order_number": 1130,
+    "customer_id": "C25704",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "delivered",
+    "date": "2026-03-03"
+  },
+  {
+    "order_number": 1410,
+    "customer_id": "C80190",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "processing",
+    "date": "2026-07-10"
+  },
+  {
+    "order_number": 1370,
+    "customer_id": "C74752",
+    "item": "Cordless drill kit 18V",
+    "amount": 948.0,
+    "status": "delivered",
+    "date": "2026-06-13"
+  },
+  {
+    "order_number": 1549,
+    "customer_id": "C90750",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "delivered",
+    "date": "2026-09-08"
+  },
+  {
+    "order_number": 1507,
+    "customer_id": "C24790",
+    "item": "Insulated food carrier 20L",
+    "amount": 580.0,
+    "status": "processing",
+    "date": "2026-08-22"
+  },
+  {
+    "order_number": 1580,
+    "customer_id": "C40595",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-09-19"
+  },
+  {
+    "order_number": 1125,
+    "customer_id": "C11044",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "shipped",
+    "date": "2026-02-23"
+  },
+  {
+    "order_number": 1307,
+    "customer_id": "C22739",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "delivered",
+    "date": "2026-05-13"
+  },
+  {
+    "order_number": 1379,
+    "customer_id": "C72071",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 117.0,
+    "status": "delivered",
+    "date": "2026-06-24"
+  },
+  {
+    "order_number": 1260,
+    "customer_id": "C54270",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "delivered",
+    "date": "2026-05-03"
+  },
+  {
+    "order_number": 1431,
+    "customer_id": "C80981",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 384.0,
+    "status": "delivered",
+    "date": "2026-07-09"
+  },
+  {
+    "order_number": 1075,
+    "customer_id": "C54967",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "shipped",
+    "date": "2026-02-09"
+  },
+  {
+    "order_number": 1371,
+    "customer_id": "C22739",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "shipped",
+    "date": "2026-06-20"
+  },
+  {
+    "order_number": 1013,
+    "customer_id": "C93611",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "delivered",
+    "date": "2026-01-11"
+  },
+  {
+    "order_number": 1185,
+    "customer_id": "C97044",
+    "item": "Air circulator pedestal fan",
+    "amount": 356.0,
+    "status": "processing",
+    "date": "2026-03-28"
+  },
+  {
+    "order_number": 1181,
+    "customer_id": "C70423",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "pending_payment",
+    "date": "2026-03-17"
+  },
+  {
+    "order_number": 1485,
+    "customer_id": "C47346",
+    "item": "Folding banquet table 6ft",
+    "amount": 852.0,
+    "status": "delivered",
+    "date": "2026-08-02"
+  },
+  {
+    "order_number": 1339,
+    "customer_id": "C41147",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "delivered",
+    "date": "2026-06-06"
+  },
+  {
+    "order_number": 1131,
+    "customer_id": "C66272",
+    "item": "Thermal receipt printer",
+    "amount": 1760.0,
+    "status": "processing",
+    "date": "2026-02-25"
+  },
+  {
+    "order_number": 1492,
+    "customer_id": "C76046",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-08-15"
+  },
+  {
+    "order_number": 1558,
+    "customer_id": "C17212",
+    "item": "Insulated food carrier 20L",
+    "amount": 116.0,
+    "status": "delivered",
+    "date": "2026-09-06"
+  },
+  {
+    "order_number": 1044,
+    "customer_id": "C41816",
+    "item": "LED ceiling panel 600x600",
+    "amount": 85.0,
+    "status": "delivered",
+    "date": "2026-01-24"
+  },
+  {
+    "order_number": 1363,
+    "customer_id": "C79243",
+    "item": "Cordless drill kit 18V",
+    "amount": 316.0,
+    "status": "processing",
+    "date": "2026-06-14"
+  },
+  {
+    "order_number": 1539,
+    "customer_id": "C53642",
+    "item": "Folding banquet table 6ft",
+    "amount": 426.0,
+    "status": "delivered",
+    "date": "2026-08-31"
+  },
+  {
+    "order_number": 1175,
+    "customer_id": "C91156",
+    "item": "Air circulator pedestal fan",
+    "amount": 89.0,
+    "status": "cancelled",
+    "date": "2026-03-26"
+  },
+  {
+    "order_number": 1011,
+    "customer_id": "C75035",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-01-01"
+  },
+  {
+    "order_number": 1405,
+    "customer_id": "C56805",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "shipped",
+    "date": "2026-07-08"
+  },
+  {
+    "order_number": 1007,
+    "customer_id": "C32983",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "shipped",
+    "date": "2026-01-07"
+  },
+  {
+    "order_number": 1440,
+    "customer_id": "C51049",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 6900.0,
+    "status": "pending_payment",
+    "date": "2026-07-11"
+  },
+  {
+    "order_number": 1382,
+    "customer_id": "C60242",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "shipped",
+    "date": "2026-06-21"
+  },
+  {
+    "order_number": 1343,
+    "customer_id": "C52823",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "delivered",
+    "date": "2026-06-04"
+  },
+  {
+    "order_number": 1435,
+    "customer_id": "C76935",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 1192.0,
+    "status": "shipped",
+    "date": "2026-07-17"
+  },
+  {
+    "order_number": 1562,
+    "customer_id": "C48504",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "delivered",
+    "date": "2026-09-05"
+  },
+  {
+    "order_number": 1218,
+    "customer_id": "C74441",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "shipped",
+    "date": "2026-04-11"
+  },
+  {
+    "order_number": 1104,
+    "customer_id": "C69597",
+    "item": "Safety helmet with visor",
+    "amount": 345.0,
+    "status": "delivered",
+    "date": "2026-02-21"
+  },
+  {
+    "order_number": 1205,
+    "customer_id": "C49862",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 596.0,
+    "status": "processing",
+    "date": "2026-04-04"
+  },
+  {
+    "order_number": 1200,
+    "customer_id": "C67595",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "delivered",
+    "date": "2026-03-30"
+  },
+  {
+    "order_number": 1202,
+    "customer_id": "C87537",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 840.0,
+    "status": "shipped",
+    "date": "2026-03-27"
+  },
+  {
+    "order_number": 1261,
+    "customer_id": "C51079",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "shipped",
+    "date": "2026-04-27"
+  },
+  {
+    "order_number": 1234,
+    "customer_id": "C87537",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1095.0,
+    "status": "delivered",
+    "date": "2026-04-15"
+  },
+  {
+    "order_number": 1166,
+    "customer_id": "C89829",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "shipped",
+    "date": "2026-03-18"
+  },
+  {
+    "order_number": 1521,
+    "customer_id": "C73298",
+    "item": "Air circulator pedestal fan",
+    "amount": 178.0,
+    "status": "delivered",
+    "date": "2026-08-21"
+  },
+  {
+    "order_number": 1504,
+    "customer_id": "C95196",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "delivered",
+    "date": "2026-08-11"
+  },
+  {
+    "order_number": 1065,
+    "customer_id": "C63841",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "processing",
+    "date": "2026-01-25"
+  },
+  {
+    "order_number": 1600,
+    "customer_id": "C87860",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-09-30"
+  },
+  {
+    "order_number": 1240,
+    "customer_id": "C62873",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "delivered",
+    "date": "2026-04-14"
+  },
+  {
+    "order_number": 1129,
+    "customer_id": "C32838",
+    "item": "Safety helmet with visor",
+    "amount": 69.0,
+    "status": "processing",
+    "date": "2026-02-22"
+  },
+  {
+    "order_number": 1505,
+    "customer_id": "C63841",
+    "item": "Thermal receipt printer",
+    "amount": 1056.0,
+    "status": "processing",
+    "date": "2026-08-14"
+  },
+  {
+    "order_number": 1298,
+    "customer_id": "C84349",
+    "item": "Barcode scanner handheld",
+    "amount": 536.0,
+    "status": "delivered",
+    "date": "2026-05-12"
+  },
+  {
+    "order_number": 1576,
+    "customer_id": "C76692",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 192.0,
+    "status": "shipped",
+    "date": "2026-09-16"
+  },
+  {
+    "order_number": 1021,
+    "customer_id": "C28035",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "processing",
+    "date": "2026-01-05"
+  },
+  {
+    "order_number": 1442,
+    "customer_id": "C96223",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 117.0,
+    "status": "shipped",
+    "date": "2026-07-20"
+  },
+  {
+    "order_number": 1569,
+    "customer_id": "C70036",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "shipped",
+    "date": "2026-09-13"
+  },
+  {
+    "order_number": 1041,
+    "customer_id": "C57002",
+    "item": "Safety helmet with visor",
+    "amount": 69.0,
+    "status": "processing",
+    "date": "2026-01-13"
+  },
+  {
+    "order_number": 1552,
+    "customer_id": "C40508",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 596.0,
+    "status": "processing",
+    "date": "2026-09-04"
+  },
+  {
+    "order_number": 1024,
+    "customer_id": "C60242",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "delivered",
+    "date": "2026-01-08"
+  },
+  {
+    "order_number": 1107,
+    "customer_id": "C56961",
+    "item": "Stainless prep table 1.5m",
+    "amount": 730.0,
+    "status": "delivered",
+    "date": "2026-02-19"
+  },
+  {
+    "order_number": 1187,
+    "customer_id": "C38679",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 298.0,
+    "status": "pending_payment",
+    "date": "2026-03-31"
+  },
+  {
+    "order_number": 1389,
+    "customer_id": "C43540",
+    "item": "Shrink wrap dispenser",
+    "amount": 96.0,
+    "status": "pending_payment",
+    "date": "2026-06-24"
+  },
+  {
+    "order_number": 1385,
+    "customer_id": "C22245",
+    "item": "Insulated food carrier 20L",
+    "amount": 174.0,
+    "status": "delivered",
+    "date": "2026-06-24"
+  },
+  {
+    "order_number": 1204,
+    "customer_id": "C27054",
+    "item": "Non-slip floor mat roll",
+    "amount": 448.0,
+    "status": "processing",
+    "date": "2026-04-01"
+  },
+  {
+    "order_number": 1447,
+    "customer_id": "C46002",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 567.0,
+    "status": "delivered",
+    "date": "2026-07-18"
+  },
+  {
+    "order_number": 1089,
+    "customer_id": "C12192",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "shipped",
+    "date": "2026-02-12"
+  },
+  {
+    "order_number": 1360,
+    "customer_id": "C23256",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 567.0,
+    "status": "delivered",
+    "date": "2026-06-12"
+  },
+  {
+    "order_number": 1123,
+    "customer_id": "C45554",
+    "item": "Stainless prep table 1.5m",
+    "amount": 365.0,
+    "status": "delivered",
+    "date": "2026-03-02"
+  },
+  {
+    "order_number": 1441,
+    "customer_id": "C40508",
+    "item": "Stainless prep table 1.5m",
+    "amount": 3650.0,
+    "status": "shipped",
+    "date": "2026-07-19"
+  },
+  {
+    "order_number": 1400,
+    "customer_id": "C41816",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "delivered",
+    "date": "2026-06-24"
+  },
+  {
+    "order_number": 1381,
+    "customer_id": "C72204",
+    "item": "Folding banquet table 6ft",
+    "amount": 426.0,
+    "status": "delivered",
+    "date": "2026-06-20"
+  },
+  {
+    "order_number": 1318,
+    "customer_id": "C58816",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "delivered",
+    "date": "2026-05-27"
+  },
+  {
+    "order_number": 1483,
+    "customer_id": "C15220",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "delivered",
+    "date": "2026-08-10"
+  },
+  {
+    "order_number": 1278,
+    "customer_id": "C54657",
+    "item": "Insulated food carrier 20L",
+    "amount": 232.0,
+    "status": "pending_payment",
+    "date": "2026-05-04"
+  },
+  {
+    "order_number": 1315,
+    "customer_id": "C77449",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "cancelled",
+    "date": "2026-05-17"
+  },
+  {
+    "order_number": 1220,
+    "customer_id": "C53007",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-04-03"
+  },
+  {
+    "order_number": 1584,
+    "customer_id": "C47649",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 596.0,
+    "status": "processing",
+    "date": "2026-09-22"
+  },
+  {
+    "order_number": 1391,
+    "customer_id": "C64874",
+    "item": "Shrink wrap dispenser",
+    "amount": 192.0,
+    "status": "processing",
+    "date": "2026-06-30"
+  },
+  {
+    "order_number": 1531,
+    "customer_id": "C54676",
+    "item": "Digital platform scale 150kg",
+    "amount": 735.0,
+    "status": "shipped",
+    "date": "2026-08-29"
+  },
+  {
+    "order_number": 1188,
+    "customer_id": "C63736",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "shipped",
+    "date": "2026-04-01"
+  },
+  {
+    "order_number": 1099,
+    "customer_id": "C64602",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1460.0,
+    "status": "shipped",
+    "date": "2026-02-15"
+  },
+  {
+    "order_number": 1317,
+    "customer_id": "C41722",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 2760.0,
+    "status": "shipped",
+    "date": "2026-05-18"
+  },
+  {
+    "order_number": 1593,
+    "customer_id": "C72873",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "shipped",
+    "date": "2026-09-19"
+  },
+  {
+    "order_number": 1267,
+    "customer_id": "C76248",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "processing",
+    "date": "2026-04-28"
+  },
+  {
+    "order_number": 1164,
+    "customer_id": "C83242",
+    "item": "Shrink wrap dispenser",
+    "amount": 192.0,
+    "status": "shipped",
+    "date": "2026-03-13"
+  },
+  {
+    "order_number": 1283,
+    "customer_id": "C48712",
+    "item": "Folding banquet table 6ft",
+    "amount": 284.0,
+    "status": "pending_payment",
+    "date": "2026-05-02"
+  },
+  {
+    "order_number": 1049,
+    "customer_id": "C92998",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "pending_payment",
+    "date": "2026-01-23"
+  },
+  {
+    "order_number": 1139,
+    "customer_id": "C83005",
+    "item": "Digital platform scale 150kg",
+    "amount": 245.0,
+    "status": "delivered",
+    "date": "2026-03-01"
+  },
+  {
+    "order_number": 1086,
+    "customer_id": "C42943",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 256.0,
+    "status": "shipped",
+    "date": "2026-02-10"
+  },
+  {
+    "order_number": 1316,
+    "customer_id": "C96765",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "delivered",
+    "date": "2026-05-26"
+  },
+  {
+    "order_number": 1472,
+    "customer_id": "C17398",
+    "item": "Barcode scanner handheld",
+    "amount": 268.0,
+    "status": "cancelled",
+    "date": "2026-08-04"
+  },
+  {
+    "order_number": 1121,
+    "customer_id": "C63736",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "delivered",
+    "date": "2026-02-19"
+  },
+  {
+    "order_number": 1098,
+    "customer_id": "C64459",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "pending_payment",
+    "date": "2026-02-08"
+  },
+  {
+    "order_number": 1072,
+    "customer_id": "C31298",
+    "item": "Insulated food carrier 20L",
+    "amount": 58.0,
+    "status": "delivered",
+    "date": "2026-02-08"
+  },
+  {
+    "order_number": 1409,
+    "customer_id": "C25704",
+    "item": "LED ceiling panel 600x600",
+    "amount": 85.0,
+    "status": "delivered",
+    "date": "2026-07-03"
+  },
+  {
+    "order_number": 1349,
+    "customer_id": "C14910",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "delivered",
+    "date": "2026-06-05"
+  },
+  {
+    "order_number": 1313,
+    "customer_id": "C67560",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "delivered",
+    "date": "2026-05-15"
+  },
+  {
+    "order_number": 1087,
+    "customer_id": "C69441",
+    "item": "Wall-mounted hand dryer",
+    "amount": 430.0,
+    "status": "delivered",
+    "date": "2026-02-05"
+  },
+  {
+    "order_number": 1386,
+    "customer_id": "C27842",
+    "item": "Stackable plastic chair",
+    "amount": 138.0,
+    "status": "shipped",
+    "date": "2026-06-18"
+  },
+  {
+    "order_number": 1009,
+    "customer_id": "C78564",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "processing",
+    "date": "2026-01-06"
+  },
+  {
+    "order_number": 1147,
+    "customer_id": "C69905",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 202.5,
+    "status": "delivered",
+    "date": "2026-03-01"
+  },
+  {
+    "order_number": 1287,
+    "customer_id": "C48504",
+    "item": "Insulated food carrier 20L",
+    "amount": 116.0,
+    "status": "delivered",
+    "date": "2026-05-10"
+  },
+  {
+    "order_number": 1548,
+    "customer_id": "C82070",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-09-02"
+  },
+  {
+    "order_number": 1056,
+    "customer_id": "C89570",
+    "item": "Insulated food carrier 20L",
+    "amount": 174.0,
+    "status": "cancelled",
+    "date": "2026-01-30"
+  },
+  {
+    "order_number": 1154,
+    "customer_id": "C40508",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "delivered",
+    "date": "2026-03-12"
+  },
+  {
+    "order_number": 1340,
+    "customer_id": "C90750",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "shipped",
+    "date": "2026-06-02"
+  },
+  {
+    "order_number": 1232,
+    "customer_id": "C95929",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-04-14"
+  },
+  {
+    "order_number": 1526,
+    "customer_id": "C11620",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 189.0,
+    "status": "pending_payment",
+    "date": "2026-08-26"
+  },
+  {
+    "order_number": 1434,
+    "customer_id": "C69355",
+    "item": "Barcode scanner handheld",
+    "amount": 1340.0,
+    "status": "pending_payment",
+    "date": "2026-07-18"
+  },
+  {
+    "order_number": 1183,
+    "customer_id": "C94853",
+    "item": "Insulated food carrier 20L",
+    "amount": 174.0,
+    "status": "pending_payment",
+    "date": "2026-03-28"
+  },
+  {
+    "order_number": 1353,
+    "customer_id": "C96577",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 512.0,
+    "status": "processing",
+    "date": "2026-06-06"
+  },
+  {
+    "order_number": 1245,
+    "customer_id": "C72873",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "delivered",
+    "date": "2026-04-21"
+  },
+  {
+    "order_number": 1469,
+    "customer_id": "C23979",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "processing",
+    "date": "2026-07-27"
+  },
+  {
+    "order_number": 1362,
+    "customer_id": "C64140",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "delivered",
+    "date": "2026-06-10"
+  },
+  {
+    "order_number": 1227,
+    "customer_id": "C54089",
+    "item": "Stainless prep table 1.5m",
+    "amount": 1095.0,
+    "status": "pending_payment",
+    "date": "2026-04-07"
+  },
+  {
+    "order_number": 1300,
+    "customer_id": "C54967",
+    "item": "Digital platform scale 150kg",
+    "amount": 735.0,
+    "status": "processing",
+    "date": "2026-05-18"
+  },
+  {
+    "order_number": 1094,
+    "customer_id": "C95196",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 2760.0,
+    "status": "shipped",
+    "date": "2026-02-12"
+  },
+  {
+    "order_number": 1387,
+    "customer_id": "C26750",
+    "item": "Barcode scanner handheld",
+    "amount": 268.0,
+    "status": "processing",
+    "date": "2026-06-17"
+  },
+  {
+    "order_number": 1258,
+    "customer_id": "C54270",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "delivered",
+    "date": "2026-04-30"
+  },
+  {
+    "order_number": 1071,
+    "customer_id": "C77466",
+    "item": "Non-slip floor mat roll",
+    "amount": 336.0,
+    "status": "cancelled",
+    "date": "2026-02-04"
+  },
+  {
+    "order_number": 1034,
+    "customer_id": "C61518",
+    "item": "Stackable plastic chair",
+    "amount": 23.0,
+    "status": "processing",
+    "date": "2026-01-09"
+  },
+  {
+    "order_number": 1436,
+    "customer_id": "C14224",
+    "item": "Cordless drill kit 18V",
+    "amount": 632.0,
+    "status": "shipped",
+    "date": "2026-07-17"
+  },
+  {
+    "order_number": 1229,
+    "customer_id": "C26426",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 296.0,
+    "status": "shipped",
+    "date": "2026-04-15"
+  },
+  {
+    "order_number": 1281,
+    "customer_id": "C28430",
+    "item": "Cordless drill kit 18V",
+    "amount": 474.0,
+    "status": "delivered",
+    "date": "2026-05-07"
+  },
+  {
+    "order_number": 1388,
+    "customer_id": "C24790",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "shipped",
+    "date": "2026-06-19"
+  },
+  {
+    "order_number": 1110,
+    "customer_id": "C51079",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 6900.0,
+    "status": "delivered",
+    "date": "2026-02-15"
+  },
+  {
+    "order_number": 1408,
+    "customer_id": "C28139",
+    "item": "Cordless drill kit 18V",
+    "amount": 158.0,
+    "status": "delivered",
+    "date": "2026-06-27"
+  },
+  {
+    "order_number": 1091,
+    "customer_id": "C82070",
+    "item": "Thermal receipt printer",
+    "amount": 176.0,
+    "status": "pending_payment",
+    "date": "2026-02-04"
+  },
+  {
+    "order_number": 1368,
+    "customer_id": "C51079",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 298.0,
+    "status": "delivered",
+    "date": "2026-06-10"
+  },
+  {
+    "order_number": 1599,
+    "customer_id": "C47649",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "shipped",
+    "date": "2026-09-25"
+  },
+  {
+    "order_number": 1248,
+    "customer_id": "C34101",
+    "item": "Non-slip floor mat roll",
+    "amount": 112.0,
+    "status": "shipped",
+    "date": "2026-04-25"
+  },
+  {
+    "order_number": 1092,
+    "customer_id": "C77449",
+    "item": "Chrome shelving unit 5-tier",
+    "amount": 96.0,
+    "status": "shipped",
+    "date": "2026-02-15"
+  },
+  {
+    "order_number": 1321,
+    "customer_id": "C27842",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 256.0,
+    "status": "pending_payment",
+    "date": "2026-05-23"
+  },
+  {
+    "order_number": 1184,
+    "customer_id": "C82070",
+    "item": "Shrink wrap dispenser",
+    "amount": 144.0,
+    "status": "delivered",
+    "date": "2026-03-22"
+  },
+  {
+    "order_number": 1404,
+    "customer_id": "C57002",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "processing",
+    "date": "2026-07-05"
+  },
+  {
+    "order_number": 1551,
+    "customer_id": "C70956",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "processing",
+    "date": "2026-09-03"
+  },
+  {
+    "order_number": 1337,
+    "customer_id": "C78564",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-05-30"
+  },
+  {
+    "order_number": 1295,
+    "customer_id": "C23425",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "pending_payment",
+    "date": "2026-05-16"
+  },
+  {
+    "order_number": 1277,
+    "customer_id": "C75973",
+    "item": "Insulated food carrier 20L",
+    "amount": 58.0,
+    "status": "processing",
+    "date": "2026-05-06"
+  },
+  {
+    "order_number": 1149,
+    "customer_id": "C40595",
+    "item": "Wall-mounted hand dryer",
+    "amount": 215.0,
+    "status": "delivered",
+    "date": "2026-03-05"
+  },
+  {
+    "order_number": 1088,
+    "customer_id": "C11620",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "shipped",
+    "date": "2026-02-08"
+  },
+  {
+    "order_number": 1525,
+    "customer_id": "C29126",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-08-23"
+  },
+  {
+    "order_number": 1351,
+    "customer_id": "C14224",
+    "item": "Air circulator pedestal fan",
+    "amount": 267.0,
+    "status": "delivered",
+    "date": "2026-06-11"
+  },
+  {
+    "order_number": 1592,
+    "customer_id": "C76692",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 296.0,
+    "status": "shipped",
+    "date": "2026-09-21"
+  },
+  {
+    "order_number": 1460,
+    "customer_id": "C70875",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "processing",
+    "date": "2026-07-31"
+  },
+  {
+    "order_number": 1543,
+    "customer_id": "C44620",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 234.0,
+    "status": "shipped",
+    "date": "2026-09-05"
+  },
+  {
+    "order_number": 1284,
+    "customer_id": "C27054",
+    "item": "Barcode scanner handheld",
+    "amount": 134.0,
+    "status": "processing",
+    "date": "2026-05-02"
+  },
+  {
+    "order_number": 1373,
+    "customer_id": "C43540",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "processing",
+    "date": "2026-06-12"
+  },
+  {
+    "order_number": 1573,
+    "customer_id": "C77300",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 67.5,
+    "status": "delivered",
+    "date": "2026-09-10"
+  },
+  {
+    "order_number": 1174,
+    "customer_id": "C17212",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "delivered",
+    "date": "2026-03-21"
+  },
+  {
+    "order_number": 1568,
+    "customer_id": "C28035",
+    "item": "LED ceiling panel 600x600",
+    "amount": 42.5,
+    "status": "delivered",
+    "date": "2026-09-18"
+  },
+  {
+    "order_number": 1005,
+    "customer_id": "C95929",
+    "item": "Barcode scanner handheld",
+    "amount": 402.0,
+    "status": "delivered",
+    "date": "2026-01-05"
+  },
+  {
+    "order_number": 1421,
+    "customer_id": "C61007",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "delivered",
+    "date": "2026-07-10"
+  },
+  {
+    "order_number": 1140,
+    "customer_id": "C86955",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 2070.0,
+    "status": "processing",
+    "date": "2026-03-10"
+  },
+  {
+    "order_number": 1226,
+    "customer_id": "C89829",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "pending_payment",
+    "date": "2026-04-10"
+  },
+  {
+    "order_number": 1159,
+    "customer_id": "C90584",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "delivered",
+    "date": "2026-03-19"
+  },
+  {
+    "order_number": 1555,
+    "customer_id": "C69942",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 675.0,
+    "status": "processing",
+    "date": "2026-09-08"
+  },
+  {
+    "order_number": 1179,
+    "customer_id": "C52762",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "shipped",
+    "date": "2026-03-20"
+  },
+  {
+    "order_number": 1414,
+    "customer_id": "C31319",
+    "item": "Insulated food carrier 20L",
+    "amount": 58.0,
+    "status": "shipped",
+    "date": "2026-07-08"
+  },
+  {
+    "order_number": 1010,
+    "customer_id": "C96765",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "pending_payment",
+    "date": "2026-01-11"
+  },
+  {
+    "order_number": 1582,
+    "customer_id": "C30934",
+    "item": "Folding banquet table 6ft",
+    "amount": 142.0,
+    "status": "delivered",
+    "date": "2026-09-16"
+  },
+  {
+    "order_number": 1082,
+    "customer_id": "C82733",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 378.0,
+    "status": "delivered",
+    "date": "2026-02-03"
+  },
+  {
+    "order_number": 1054,
+    "customer_id": "C64874",
+    "item": "Barcode scanner handheld",
+    "amount": 268.0,
+    "status": "processing",
+    "date": "2026-01-19"
+  },
+  {
+    "order_number": 1443,
+    "customer_id": "C95929",
+    "item": "Non-slip floor mat roll",
+    "amount": 224.0,
+    "status": "processing",
+    "date": "2026-07-14"
+  },
+  {
+    "order_number": 1395,
+    "customer_id": "C80345",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "shipped",
+    "date": "2026-06-28"
+  },
+  {
+    "order_number": 1195,
+    "customer_id": "C89570",
+    "item": "Glass display cabinet 1.2m",
+    "amount": 420.0,
+    "status": "delivered",
+    "date": "2026-04-02"
+  },
+  {
+    "order_number": 1479,
+    "customer_id": "C93611",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "delivered",
+    "date": "2026-07-30"
+  },
+  {
+    "order_number": 1566,
+    "customer_id": "C69597",
+    "item": "Warehouse pallet jack 2.5t",
+    "amount": 690.0,
+    "status": "delivered",
+    "date": "2026-09-15"
+  },
+  {
+    "order_number": 1392,
+    "customer_id": "C72873",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "delivered",
+    "date": "2026-06-28"
+  },
+  {
+    "order_number": 1134,
+    "customer_id": "C71141",
+    "item": "Cordless drill kit 18V",
+    "amount": 632.0,
+    "status": "delivered",
+    "date": "2026-03-02"
+  },
+  {
+    "order_number": 1276,
+    "customer_id": "C75035",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 39.0,
+    "status": "delivered",
+    "date": "2026-05-10"
+  },
+  {
+    "order_number": 1272,
+    "customer_id": "C67340",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-05-01"
+  },
+  {
+    "order_number": 1453,
+    "customer_id": "C60556",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 124.0,
+    "status": "processing",
+    "date": "2026-07-17"
+  },
+  {
+    "order_number": 1224,
+    "customer_id": "C90584",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 148.0,
+    "status": "delivered",
+    "date": "2026-04-14"
+  },
+  {
+    "order_number": 1579,
+    "customer_id": "C22571",
+    "item": "Rolling tool chest 6-drawer",
+    "amount": 596.0,
+    "status": "processing",
+    "date": "2026-09-12"
+  },
+  {
+    "order_number": 1122,
+    "customer_id": "C11620",
+    "item": "Corrugated carton bundle (25)",
+    "amount": 156.0,
+    "status": "processing",
+    "date": "2026-02-24"
+  },
+  {
+    "order_number": 1078,
+    "customer_id": "C29340",
+    "item": "Shrink wrap dispenser",
+    "amount": 48.0,
+    "status": "delivered",
+    "date": "2026-02-09"
+  },
+  {
+    "order_number": 1023,
+    "customer_id": "C82070",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "processing",
+    "date": "2026-01-13"
+  },
+  {
+    "order_number": 1274,
+    "customer_id": "C38679",
+    "item": "Stainless steel kitchen trolley",
+    "amount": 567.0,
+    "status": "delivered",
+    "date": "2026-05-07"
+  },
+  {
+    "order_number": 1524,
+    "customer_id": "C21506",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 31.0,
+    "status": "shipped",
+    "date": "2026-08-25"
+  },
+  {
+    "order_number": 1151,
+    "customer_id": "C11044",
+    "item": "Safety helmet with visor",
+    "amount": 34.5,
+    "status": "shipped",
+    "date": "2026-03-15"
+  },
+  {
+    "order_number": 1165,
+    "customer_id": "C44387",
+    "item": "LED ceiling panel 600x600",
+    "amount": 127.5,
+    "status": "delivered",
+    "date": "2026-03-10"
+  },
+  {
+    "order_number": 1458,
+    "customer_id": "C75973",
+    "item": "Industrial floor fan 18 inch",
+    "amount": 128.0,
+    "status": "delivered",
+    "date": "2026-07-27"
+  },
+  {
+    "order_number": 1170,
+    "customer_id": "C91987",
+    "item": "Heavy-duty extension reel 20m",
+    "amount": 135.0,
+    "status": "shipped",
+    "date": "2026-03-15"
+  },
+  {
+    "order_number": 1470,
+    "customer_id": "C74441",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 740.0,
+    "status": "delivered",
+    "date": "2026-07-26"
+  },
+  {
+    "order_number": 1101,
+    "customer_id": "C80305",
+    "item": "Commercial mop bucket with wringer",
+    "amount": 74.0,
+    "status": "pending_payment",
+    "date": "2026-02-14"
+  },
+  {
+    "order_number": 1081,
+    "customer_id": "C89569",
+    "item": "Ceramic tile adhesive 20kg",
+    "amount": 62.0,
+    "status": "delivered",
+    "date": "2026-02-12"
+  }
+]

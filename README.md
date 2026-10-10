@@ -25,11 +25,16 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 3 of 18 is complete**: the
-project skeleton, the five-screen frontend shell, the health endpoint, and the
-SQLite data layer. The security system, the workspace data, the agents and the
-scenario suite are added in later stages, and the sections below will grow with
-them. Nothing in this README describes behaviour that does not yet run.
+This repository is being built in stages. **Stage 4 of 18 is complete**: the
+project skeleton, the five-screen frontend shell, the health endpoint, the
+SQLite data layer, and Lim & Co's synthetic workspace with its safe path
+utilities. The decoys, the detector, the gateway, the agents and the scenario
+suite are added in later stages, and the sections below will grow with them.
+Nothing in this README describes behaviour that does not yet run.
+
+Regenerate the workspace at any time with
+`.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
+and overwrites the tree with identical bytes.
 
 ## Requirements
 
