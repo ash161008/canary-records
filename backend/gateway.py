@@ -47,6 +47,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
+import urllib.parse
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -531,6 +532,41 @@ def _urls_in(text: str) -> list[str]:
     return _URL.findall(text)
 
 
+# A URL is inspected both as written and once percent-decoded. Without the
+# decoded form, writing "@" as "%40" hid a real customer address from the
+# personal-data-in-a-link rule while the same address in plain text was held.
+MAX_URL_CHARS = 4096
+
+
+def _url_forms(url: str) -> list[str]:
+    """The URL as written, plus its decoded form when that differs.
+
+    Decoding is one level deep and length-bounded, matching the detector, so
+    a hostile link cannot make this expensive. A URL that cannot be decoded
+    is returned as a form that reads as personal data, so the caller holds
+    it rather than treating an unreadable link as clean.
+    """
+    forms = [url]
+    if len(url) > MAX_URL_CHARS:
+        # Too long to decode safely. Treat it as unexamined, not as clean.
+        return forms
+    try:
+        decoded = urllib.parse.unquote_plus(url)
+    except Exception:  # noqa: BLE001 - any decoding failure fails closed
+        return forms
+    if decoded != url:
+        forms.append(decoded)
+    return forms
+
+
+def _url_carries_personal_data(url: str) -> bool:
+    """True when a link holds personal data, however it is encoded."""
+    if len(url) > MAX_URL_CHARS:
+        # An oversized link was not fully examined, so it is not clean.
+        return True
+    return any(detector.extract_personal(form) for form in _url_forms(url))
+
+
 def _host_of(url: str) -> str:
     """The host part of a URL, lowercased.
 
@@ -717,7 +753,7 @@ def _outbound_verdict(
     # message that carries personal data.
     urls = _urls_in(message_text)
     for url in urls:
-        if detector.extract_personal(url):
+        if _url_carries_personal_data(url):
             return _Verdict(
                 decision=HELD,
                 rule="personal_data_in_url",
