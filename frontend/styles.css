@@ -26,6 +26,11 @@
 
 * { box-sizing: border-box; }
 
+/* No element may widen the document. Wide content - tables, traces, message
+   bodies - scrolls inside its own container instead. */
+html, body { max-width: 100%; }
+img, pre, table { max-width: 100%; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -300,18 +305,24 @@ h1 {
   letter-spacing: 0.07em; color: var(--text-faint); margin-bottom: 3px;
 }
 
-.counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; }
+/* The paths are long and the counts must stay readable, so each card stacks
+   rather than competing for one line. Side by side, a 44-character mono path
+   and its count did not fit the track and the number was clipped. */
+.counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
 .count {
-  display: flex; justify-content: space-between; gap: 12px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
   background: var(--bg-sunken); border: 1px solid var(--border);
-  border-radius: 6px; padding: 9px 12px;
+  border-radius: 6px; padding: 10px 12px;
 }
-.count-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
-.count-value { font-size: 13px; white-space: nowrap; }
+.count-label {
+  font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
+  line-height: 1.4; overflow-wrap: anywhere; min-width: 0;
+}
+.count-value { font-size: 15px; font-weight: 600; color: var(--text); }
 
 /* ---------- tables ---------- */
 
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table th {
   text-align: left; font-size: 11px; text-transform: uppercase;
@@ -387,8 +398,12 @@ h1 {
   color: var(--text-dim);
 }
 
-.run-grid { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
-@media (max-width: 900px) { .run-grid { grid-template-columns: 1fr; } }
+.run-grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px; align-items: start;
+}
+.run-grid > * { min-width: 0; }
+@media (max-width: 900px) { .run-grid { grid-template-columns: minmax(0, 1fr); } }
 
 .session-state {
   display: flex; gap: 22px; flex-wrap: wrap;
@@ -405,6 +420,7 @@ h1 {
 
 /* The phone-shaped alert panel. */
 .phone {
+  max-width: 100%;
   background: #05070a; border: 1px solid var(--border-mid);
   border-radius: 28px; padding: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
@@ -470,3 +486,86 @@ h1 {
 .btn-danger { border-color: rgba(240, 83, 63, 0.5); color: var(--danger); }
 .btn-danger:hover:not(:disabled) { border-color: var(--danger); background: rgba(240, 83, 63, 0.1); }
 .alert .btn-small { margin-top: 10px; }
+
+/* The baseline heading is informational, not an alarm. */
+.sub-title.is-baseline { color: var(--info); }
+
+/* ---------- the result banner (screen 3) ---------- */
+/* Colour and wording both come from the backend's verdict. */
+
+.result-banner { margin-bottom: 16px; }
+.result-banner:empty { display: none; }
+.result-banner {
+  padding: 14px 16px; border-radius: 8px;
+  border: 1px solid var(--border-mid); border-left-width: 4px;
+  background: var(--bg-sunken);
+}
+.result-headline {
+  margin: 0 0 6px; font-size: 20px; font-weight: 600; line-height: 1.25;
+  color: var(--text);
+}
+.result-reason { margin: 0; font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+
+.result-banner[data-severity="allowed"]     { border-left-color: var(--ok); }
+.result-banner[data-severity="allowed"] .result-headline     { color: var(--ok); }
+.result-banner[data-severity="quarantined"] { border-left-color: var(--accent); }
+.result-banner[data-severity="quarantined"] .result-headline { color: var(--accent); }
+.result-banner[data-severity="held"]        { border-left-color: var(--warn); }
+.result-banner[data-severity="held"] .result-headline        { color: var(--warn); }
+.result-banner[data-severity="blocked"],
+.result-banner[data-severity="denied"]      { border-left-color: var(--danger); }
+.result-banner[data-severity="blocked"] .result-headline,
+.result-banner[data-severity="denied"] .result-headline      { color: var(--danger); }
+.result-banner[data-severity="info"]        { border-left-color: var(--info); }
+.result-banner[data-severity="info"] .result-headline        { color: var(--info); }
+
+/* ---------- trace row tints, by the gateway's decision ---------- */
+
+.data-table tr[data-decision="blocked"] td,
+.data-table tr[data-decision="denied"] td  { background: rgba(240, 83, 63, 0.11); }
+.data-table tr[data-decision="held"] td        { background: rgba(210, 153, 34, 0.12); }
+.data-table tr[data-decision="quarantined"] td { background: rgba(232, 140, 49, 0.14); }
+.data-table tr[data-decision="blocked"] td:first-child,
+.data-table tr[data-decision="denied"] td:first-child  { box-shadow: inset 3px 0 0 var(--danger); }
+.data-table tr[data-decision="held"] td:first-child        { box-shadow: inset 3px 0 0 var(--warn); }
+.data-table tr[data-decision="quarantined"] td:first-child { box-shadow: inset 3px 0 0 #e88c31; }
+
+/* ---------- what the suite expected, beside what happened ---------- */
+
+.trace-footer {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+}
+.trace-footer:empty { display: none; }
+.footer-item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.footer-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+
+/* ---------- the three numbers that must read on video ---------- */
+
+.headline-metrics {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px; margin-bottom: 14px;
+}
+.headline-metric {
+  display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  background: var(--bg-sunken); border: 1px solid var(--border);
+  border-left: 3px solid var(--border-mid);
+  border-radius: 8px; padding: 14px 16px;
+}
+.headline-metric[data-tone="good"]    { border-left-color: var(--ok); }
+.headline-metric[data-tone="bad"]     { border-left-color: var(--danger); }
+.headline-metric[data-tone="neutral"] { border-left-color: var(--border-mid); }
+.headline-value {
+  font-size: 38px; line-height: 1.05; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.headline-metric[data-tone="good"] .headline-value    { color: var(--ok); }
+.headline-metric[data-tone="bad"] .headline-value     { color: var(--danger); }
+.headline-metric[data-tone="neutral"] .headline-value { color: var(--text-dim); }
+.headline-label {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-dim);
+}

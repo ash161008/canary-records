@@ -8,3 +8,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .DS_Store
+
+# Temporary layout-measurement harnesses (see tests/test_browser.py)
+frontend/_browser_check.html
+frontend/_measure.html

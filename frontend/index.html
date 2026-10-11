@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Canary Records</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
@@ -189,6 +190,7 @@
     <div class="run-grid">
       <div class="panel">
         <h2 class="panel-title">Gateway decisions, in order</h2>
+        <div class="result-banner" id="result-banner" role="status" aria-live="polite"></div>
         <div class="table-scroll">
           <table class="data-table" id="trace-table">
             <thead>
@@ -197,6 +199,7 @@
             <tbody></tbody>
           </table>
         </div>
+        <div class="trace-footer" id="trace-footer"></div>
         <div class="session-state" id="session-state"></div>
         <div class="actions" id="session-actions"></div>
       </div>

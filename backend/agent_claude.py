@@ -362,6 +362,11 @@ def _outcome(
         "model_id": config.CLAUDE_MODEL,
         "sdk_version": SDK_VERSION,
         "admin_options": _admin_options(session),
+        # The banner the interface shows. Worded in the gateway so it can only
+        # ever describe an outcome the gateway actually reached.
+        **gateway.run_headline(
+            stopped_because, session.status if session else None, activity
+        ),
     }
 
 

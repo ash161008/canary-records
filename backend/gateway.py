@@ -83,6 +83,98 @@ DENIED = "denied"
 # any part of what was withheld.
 WITHHELD_MESSAGE = "That content was withheld by security policy."
 
+
+def run_headline(stopped_because: str, status: str | None, activity: list) -> dict:
+    """One line summarising how a run ended, for the interface to display.
+
+    The wording is decided here rather than in the browser, so a banner can
+    never describe an outcome the gateway did not reach. The reason text is
+    the gateway's own explanation of the step that ended the run - already
+    written for a person, and already free of record contents.
+    """
+    catching = [
+        step
+        for step in activity
+        if step.get("decision") in (QUARANTINED, BLOCKED, HELD)
+        or step.get("hard_deny")
+    ]
+    last = catching[-1] if catching else None
+    sent = [
+        step
+        for step in activity
+        if step.get("tool") == SEND_EMAIL and step.get("decision") == ALLOWED
+    ]
+
+    if stopped_because == QUARANTINED:
+        return {
+            "headline": "Content withheld before the AI saw it",
+            "reason": (last or {}).get("reason")
+            or "A decoy record was present, so the content was not returned.",
+            "severity": "quarantined",
+        }
+
+    if stopped_because in (BLOCKED, "hard_denied"):
+        return {
+            "headline": "Nothing was sent",
+            "reason": (last or {}).get("reason")
+            or "The gateway refused the request outright.",
+            "severity": "blocked",
+        }
+
+    if stopped_because == HELD:
+        return {
+            "headline": "Held for an administrator to review",
+            "reason": (last or {}).get("reason")
+            or "The message needs review before it can be sent.",
+            "severity": "held",
+        }
+
+    if stopped_because == "model_refused":
+        return {
+            "headline": "The model declined the request",
+            "reason": (
+                "The agent refused to act on the message. The gateway was not "
+                "asked to do anything, so it stopped nothing."
+            ),
+            "severity": "info",
+        }
+
+    if stopped_because in ("api_error", "unexpected_stop_reason", "call_limit_reached",
+                           "iteration_limit_reached", "session_ended"):
+        return {
+            "headline": "The run stopped early",
+            "reason": (
+                "The run ended before it finished its task. Nothing was "
+                "treated as permission to act."
+            ),
+            "severity": "info",
+        }
+
+    if last is not None:
+        # It ran to the end, but something along the way was refused.
+        return {
+            "headline": "Finished, with requests refused along the way",
+            "reason": last.get("reason")
+            or "At least one request was refused by the gateway.",
+            "severity": last.get("decision") or "info",
+        }
+
+    if sent:
+        return {
+            "headline": "Reply sent",
+            "reason": (
+                "Every request passed the gateway's checks, and the reply was "
+                "recorded as sent. No real email was sent."
+            ),
+            "severity": "allowed",
+        }
+
+    return {
+        "headline": "Finished with nothing refused",
+        "reason": "The run completed and the gateway refused nothing.",
+        "severity": "allowed",
+    }
+
 _EMAIL_ADDRESS = re.compile(r"^[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]{1,255}\.[A-Za-z]{2,24}$")
 
 # Links, in three shapes: with a scheme, starting "www.", and schemeless -

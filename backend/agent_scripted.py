@@ -234,6 +234,11 @@ def run_scripted(session_id: str, tool_calls: list[dict]) -> dict:
         "calls_requested": len(tool_calls),
         "calls_executed": len(activity),
         "activity": activity,
+        # The banner the interface shows. Worded here so it can only ever
+        # describe an outcome the gateway actually reached.
+        **gateway.run_headline(
+            stopped_because, final.status if final else None, activity
+        ),
     }
 
 

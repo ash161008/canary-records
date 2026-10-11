@@ -616,7 +616,25 @@ def scoreboard(suite_run_id: str) -> dict:
         ),
         "alerts_measured": len(latencies),
         "failed_or_unexpected": failures,
+        # How that list should be headed. In monitor mode nothing is
+        # enforced, so leaks are the expected baseline - the measurement the
+        # protected modes are compared against. Calling them failures would
+        # invite a reader to see a broken gateway where there is in fact no
+        # gateway running at all. The wording is decided here, from the run's
+        # own protection mode, so the interface cannot get it wrong.
+        "failures_label": _failures_label(suite_run.protection_mode, len(failures)),
+        "failures_are_expected_baseline": suite_run.protection_mode == "monitor",
     }
+
+
+def _failures_label(protection_mode: str, count: int) -> str:
+    """The heading for the failed-or-unexpected list, per protection mode."""
+    if protection_mode == "monitor":
+        return (
+            f"Leaks in the unprotected baseline ({count}) - this is what the "
+            "gateway prevents"
+        )
+    return f"Failed or unexpected ({count})"
 
 
 def _is_failure(row) -> bool:

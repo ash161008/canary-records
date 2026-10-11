@@ -223,6 +223,19 @@ if config.DEMO_MODE:
             raise HTTPException(status_code=409, detail=str(error))
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon() -> FileResponse:
+    """The site icon.
+
+    Declared in the page as an SVG, and served here as well because some
+    browsers request /favicon.ico regardless - which would be a 404 in the
+    console during a demo.
+    """
+    return FileResponse(
+        config.FRONTEND_DIR / "favicon.svg", media_type="image/svg+xml"
+    )
+
+
 @app.get("/")
 def index() -> FileResponse:
     """Serve the single-page frontend."""

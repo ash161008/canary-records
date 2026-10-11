@@ -22,6 +22,10 @@ const state = {
   runId: null,
 };
 
+// In-flight loads, so two calls arriving together share one request instead of
+// each populating the same <select>.
+const loading = { agents: null, messages: null };
+
 /* ---------- small helpers ---------- */
 
 function el(tag, className, text) {
@@ -121,7 +125,7 @@ function showScreen(name) {
     else button.removeAttribute("aria-current");
   });
 
-  window.location.hash = name;
+  if (window.location.hash.replace("#", "") !== name) window.location.hash = name;
   document.getElementById("main").scrollIntoView({ block: "start" });
 
   if (name === "seed") loadWorkspace();
@@ -234,27 +238,42 @@ function describeOption(item) {
 }
 
 /** The agent names come from the backend, never from this file. */
-async function loadAgents() {
-  const select = document.getElementById("agent-select");
-  if (select.options.length) return;
-  try {
-    const data = await api("/api/agents");
-    data.selectable.forEach((agent) => {
-      const option = document.createElement("option");
-      option.value = agent.agent_mode;
-      option.textContent = agent.agent_label;
-      select.appendChild(option);
-    });
-  } catch (error) {
-    setStatus("run-status", `Could not load the agent list: ${error.message}`, "error");
-  }
+function loadAgents() {
+  if (loading.agents) return loading.agents;
+  loading.agents = (async () => {
+    const select = document.getElementById("agent-select");
+    try {
+      const data = await api("/api/agents");
+      const chosen = select.value;
+      // Cleared first: this function must be safe to call more than once.
+      clear(select);
+      data.selectable.forEach((agent) => {
+        const option = document.createElement("option");
+        option.value = agent.agent_mode;
+        option.textContent = agent.agent_label;
+        select.appendChild(option);
+      });
+      if (chosen) select.value = chosen;
+    } catch (error) {
+      setStatus("run-status", `Could not load the agent list: ${error.message}`, "error");
+      loading.agents = null;
+    }
+  })();
+  return loading.agents;
 }
 
-async function loadMessages() {
+function loadMessages() {
+  if (loading.messages) return loading.messages;
+  loading.messages = populateMessages();
+  return loading.messages;
+}
+
+async function populateMessages() {
   await loadAgents();
-  if (state.messages.length) return;
   const select = document.getElementById("message-select");
+  // Cleared first, for the same reason as the agent picker.
   clear(select);
+  state.messages = [];
 
   const groups = [];
   try {
@@ -283,7 +302,6 @@ async function loadMessages() {
     setStatus("run-status", `Could not load scenarios: ${error.message}`, "error");
   }
 
-  state.messages = [];
   groups.forEach(([label, items]) => {
     if (!items.length) return;
     const group = document.createElement("optgroup");
@@ -297,6 +315,11 @@ async function loadMessages() {
     });
     select.appendChild(group);
   });
+
+  if (!state.messages.length) {
+    loading.messages = null;
+    return;
+  }
 
   // The two live demo scenes are the harder injections, so start there.
   const preferred = state.messages.find((item) => item.id === "H2");
@@ -332,12 +355,60 @@ async function selectMessage() {
   }
   state.selected = item;
 
-  const meta = [`From: ${item.from}`, `Subject: ${item.subject}`];
-  if (item.expected_protect_outcome) {
-    meta.push(`Expected under protect: ${item.expected_protect_outcome}`);
-  }
-  document.getElementById("message-meta").textContent = meta.join("   ·   ");
+  // The expected outcome is deliberately NOT shown here. Before a run it
+  // reads as a pre-scripted answer; it belongs beside what actually happened,
+  // which is what the trace footer does once the run is over.
+  document.getElementById("message-meta").textContent = [
+    `From: ${item.from}`,
+    `Subject: ${item.subject}`,
+  ].join("   ·   ");
   document.getElementById("message-body").textContent = visibleText(item.body || "");
+
+  clearResult();
+}
+
+/** Wipe the banner and footer, so a stale result never sits over a new run. */
+function clearResult() {
+  clear(document.getElementById("result-banner"));
+  clear(document.getElementById("trace-footer"));
+}
+
+/** The result banner. Every word of it comes from the backend. */
+function renderResultBanner(outcome) {
+  const banner = document.getElementById("result-banner");
+  clear(banner);
+  if (!outcome || !outcome.headline) return;
+
+  banner.dataset.severity = outcome.severity || "info";
+  banner.appendChild(el("p", "result-headline", outcome.headline));
+  banner.appendChild(el("p", "result-reason", outcome.reason || ""));
+}
+
+/** What the suite expected, beside what the gateway actually did. */
+function renderTraceFooter(outcome) {
+  const footer = document.getElementById("trace-footer");
+  clear(footer);
+  if (!outcome) return;
+
+  const expected = state.selected && state.selected.expected_protect_outcome;
+  if (expected) {
+    const item = el("div", "footer-item");
+    item.appendChild(el("span", "footer-label", "Expected (from the test suite)"));
+    item.appendChild(el("strong", null, expected));
+    footer.appendChild(item);
+  }
+
+  const actual = el("div", "footer-item");
+  actual.appendChild(el("span", "footer-label", "What actually happened"));
+  actual.appendChild(el("strong", null, outcome.stopped_because || ""));
+  footer.appendChild(actual);
+
+  if (outcome.protection_mode) {
+    const mode = el("div", "footer-item");
+    mode.appendChild(el("span", "footer-label", "Protection mode"));
+    mode.appendChild(el("strong", null, outcome.protection_mode));
+    footer.appendChild(mode);
+  }
 }
 
 function renderTrace(activity) {
@@ -353,6 +424,8 @@ function renderTrace(activity) {
   }
   activity.forEach((entry) => {
     const row = el("tr");
+    // The row's tint comes from the gateway's own decision, nothing else.
+    row.dataset.decision = entry.decision || "";
     row.appendChild(el("td", "mono", entry.step));
     row.appendChild(el("td", null, entry.tool || ""));
     row.appendChild(el("td", "mono", entry.resource || ""));
@@ -447,7 +520,9 @@ async function runAgent() {
 
   state.session = outcome;
   state.runId = outcome.run_id;
+  renderResultBanner(outcome);
   renderTrace(outcome.activity);
+  renderTraceFooter(outcome);
   renderSessionState(outcome);
   setStatus("run-status", `Run finished: ${outcome.stopped_because}.`, "ok");
   await Promise.all([loadAlerts(), loadOutbox()]);
@@ -494,7 +569,9 @@ async function continueSession(sessionId) {
     );
     if (outcome) {
       state.session = outcome;
+      renderResultBanner(outcome);
       renderTrace((state.session.activity || []).length ? state.session.activity : []);
+      renderTraceFooter(outcome);
       renderSessionState(outcome);
       setStatus(
         "run-status",
@@ -791,6 +868,7 @@ async function resetDemo() {
       `${result.canaries_removed} decoys removed. The previous run is kept.`,
     "ok"
   );
+  clearResult();
   renderTrace([]);
   renderSessionState(null);
   await loadAudit();
@@ -871,8 +949,28 @@ function renderScoreboard(board) {
   head.appendChild(el("span", "meta", `${board.runs} run(s)`));
   card.appendChild(head);
 
+  // The three numbers that have to be readable on video. Which direction is
+  // good differs per metric - no disclosures is good, but nothing stopped is
+  // not - so each carries its own polarity rather than one rule for all.
+  const headline = el("div", "headline-metrics");
+  [
+    ["Unauthorised disclosures", board.unauthorised_disclosures, "zero"],
+    ["Attacks leaked", board.attacks_leaked, "zero"],
+    ["Stopped by gateway", board.attacks_stopped_by_gateway, "more"],
+  ].forEach(([label, value, goodWhen]) => {
+    const figure = el("div", "headline-metric");
+    if (value === null || value === undefined) figure.dataset.tone = "neutral";
+    else if (goodWhen === "zero") figure.dataset.tone = value === 0 ? "good" : "bad";
+    else figure.dataset.tone = value > 0 ? "good" : "neutral";
+    figure.appendChild(
+      el("strong", "headline-value", value === null || value === undefined ? "—" : String(value))
+    );
+    figure.appendChild(el("span", "headline-label", label));
+    headline.appendChild(figure);
+  });
+  card.appendChild(headline);
+
   const grid = el("div", "metrics");
-  grid.appendChild(metricRow("Unauthorised disclosures", board.unauthorised_disclosures));
   grid.appendChild(metricRow("Canary exposures", board.canary_exposures));
   grid.appendChild(metricRow("Forbidden accesses", board.forbidden_accesses));
   grid.appendChild(
@@ -881,8 +979,6 @@ function renderScoreboard(board) {
   grid.appendChild(
     metricRow("Targeted stopped", `${board.targeted_stopped} / ${board.targeted_total}`)
   );
-  grid.appendChild(metricRow("Attacks leaked", board.attacks_leaked));
-  grid.appendChild(metricRow("Stopped by gateway", board.attacks_stopped_by_gateway));
   grid.appendChild(
     metricRow("Not attempted by model", board.attacks_not_attempted_by_model)
   );
@@ -913,8 +1009,26 @@ function renderScoreboard(board) {
   });
 
   const failures = board.failed_or_unexpected || [];
-  const title = el("h3", "sub-title", `Failed or unexpected (${failures.length})`);
+  // The heading comes from the backend, which knows whether this run was a
+  // protected mode or the unprotected baseline.
+  const title = el(
+    "h3",
+    "sub-title",
+    board.failures_label || `Failed or unexpected (${failures.length})`
+  );
+  if (board.failures_are_expected_baseline) title.classList.add("is-baseline");
   card.appendChild(title);
+  if (board.failures_are_expected_baseline) {
+    card.appendChild(
+      el(
+        "p",
+        "meta",
+        "Monitor mode enforces nothing: role checks, read quarantine and the " +
+          "outbound rules are evaluated and logged but never applied. These " +
+          "are the leaks a protected run does not have."
+      )
+    );
+  }
   if (!failures.length) {
     card.appendChild(el("p", "empty", "None."));
   } else {
@@ -979,9 +1093,12 @@ function init() {
     else if (event.key === "ArrowLeft") step(-1);
   });
 
-  window.addEventListener("hashchange", () =>
-    showScreen(window.location.hash.replace("#", ""))
-  );
+  window.addEventListener("hashchange", () => {
+    const target = window.location.hash.replace("#", "");
+    const active = document.querySelector(".screen.is-active");
+    if (active && active.id === `screen-${target}`) return;
+    showScreen(target);
+  });
 
   document.getElementById("seed-button").addEventListener("click", async () => {
     const result = await withButton(null, "seed-status", "Planting the decoys…", () =>
