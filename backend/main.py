@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from backend import (
     __version__,
     agent_claude,
+    alerts,
     agent_scripted,
     audit,
     config,
@@ -594,12 +595,8 @@ def get_alerts(run_id: str | None = None, status: str | None = None) -> dict:
     files and decisions, never file contents.
     """
     resolved = _resolve_run_id(run_id)
-    alerts = database.list_alerts(run_id=resolved, status=status)
-    return {
-        "run_id": resolved,
-        "count": len(alerts),
-        "alerts": [alert.model_dump() for alert in alerts],
-    }
+    listed = alerts.list_alerts(run_id=resolved, status=status)
+    return {"run_id": resolved, "count": len(listed), "alerts": listed}
 
 
 @app.get("/api/emails")
@@ -663,3 +660,42 @@ def get_agents() -> dict:
         ],
         "labels": dict(config.AGENT_LABELS),
     }
+
+
+@app.post("/api/alerts/{alert_id}/resolve", dependencies=[Depends(require_admin)])
+def resolve_alert(alert_id: int) -> dict:
+    """Mark an alert dealt with. The alert is never deleted."""
+    try:
+        return alerts.resolve(alert_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+
+
+@app.post("/api/reset", dependencies=[Depends(require_admin)])
+def reset_demo() -> dict:
+    """Start a new demo run.
+
+    Restores the workspace, removes the decoys, finalises the old run's open
+    business and opens a fresh audit chain. Earlier runs are kept and stay
+    attributable; no database and no source file is ever deleted.
+    """
+    try:
+        return alerts.reset_demo()
+    except Exception:
+        logger.exception("reset failed")
+        raise HTTPException(status_code=500, detail="The reset failed; see server log.")
+
+
+if config.DEMO_MODE:
+
+    @app.post("/api/beacon/{canary_id}", dependencies=[Depends(require_admin)])
+    def simulate_beacon(canary_id: str) -> dict:
+        """Simulate someone outside the company contacting a decoy.
+
+        Present only when DEMO_MODE=1. Nothing touches the network; the alert
+        says plainly that the contact is simulated.
+        """
+        try:
+            return alerts.simulate_beacon(canary_id)
+        except ValueError as error:
+            raise HTTPException(status_code=404, detail=str(error))

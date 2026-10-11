@@ -250,12 +250,18 @@
         </div>
         <div class="field field-action">
           <span aria-hidden="true">&nbsp;</span>
-          <button class="btn" id="beacon-button" disabled
-                  title="The beacon simulation arrives in Stage 14.">
-            Simulate beacon hit
-          </button>
+          <button class="btn" id="beacon-button">Simulate beacon hit</button>
+        </div>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn btn-danger" id="reset-button">Reset demo</button>
         </div>
       </div>
+      <p class="stage-note">
+        Reset starts a new demo run: it restores the workspace, removes the
+        decoys and opens a fresh audit chain. Earlier runs are kept and stay
+        listed above.
+      </p>
       <p class="status" id="audit-status" role="status" aria-live="polite"></p>
     </div>
 

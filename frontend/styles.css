@@ -466,3 +466,7 @@ h1 {
 
 .failures { margin: 0; padding-left: 20px; }
 .failures li { font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
+
+.btn-danger { border-color: rgba(240, 83, 63, 0.5); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { border-color: var(--danger); background: rgba(240, 83, 63, 0.1); }
+.alert .btn-small { margin-top: 10px; }

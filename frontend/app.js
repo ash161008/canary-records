@@ -526,6 +526,13 @@ async function loadAlerts() {
       card.appendChild(el("p", "alert-title", alert.title));
       card.appendChild(el("p", "alert-message", alert.message));
       card.appendChild(el("p", "alert-time", alert.created_at));
+      if (alert.status === "open") {
+        const resolve = el("button", "btn btn-small", "Mark resolved");
+        resolve.addEventListener("click", () => resolveAlert(alert.id));
+        card.appendChild(resolve);
+      } else {
+        card.appendChild(el("p", "alert-time", "resolved"));
+      }
       list.appendChild(card);
     });
   } catch (error) {
@@ -564,6 +571,13 @@ async function loadOutbox() {
     row.appendChild(cell);
     body.appendChild(row);
   }
+}
+
+async function resolveAlert(alertId) {
+  const result = await withButton(null, "run-status", "Resolving…", () =>
+    api(`/api/alerts/${alertId}/resolve`, { method: "POST", admin: true })
+  );
+  if (result) await loadAlerts();
 }
 
 /* ---------- screen 4: audit and admin ---------- */
@@ -721,6 +735,65 @@ async function decideEmail(emailId, action) {
     "ok"
   );
   await Promise.all([loadHeld(), loadAuditTable()]);
+}
+
+async function simulateBeacon() {
+  let canaries;
+  try {
+    canaries = await api("/api/canaries", { admin: true });
+  } catch (error) {
+    setStatus("audit-status", error.message, "error");
+    return;
+  }
+  if (!canaries.count) {
+    setStatus(
+      "audit-status",
+      "There are no decoys planted, so none can be contacted. Seed the workspace first.",
+      "error"
+    );
+    return;
+  }
+  const canary = canaries.canaries[0];
+  const result = await withButton(null, "audit-status", "Simulating a contact…", () =>
+    api(`/api/beacon/${encodeURIComponent(canary.id)}`, {
+      method: "POST",
+      admin: true,
+    })
+  );
+  if (!result) return;
+  setStatus(
+    "audit-status",
+    `Simulated: a decoy in ${result.location} was contacted, so that file has leaked. See the alert panel on screen 3.`,
+    "warning"
+  );
+  await loadAuditTable();
+}
+
+async function resetDemo() {
+  const confirmed = window.confirm(
+    "Reset the demo?\n\nThis starts a new demo run: the workspace is " +
+      "restored, the decoys are removed and a fresh audit chain begins.\n\n" +
+      "Earlier runs are kept and stay listed. Nothing is deleted."
+  );
+  if (!confirmed) return;
+
+  const result = await withButton(null, "audit-status", "Resetting…", () =>
+    api("/api/reset", { method: "POST", admin: true })
+  );
+  if (!result) return;
+
+  state.runId = result.run_id;
+  state.session = null;
+  setStatus(
+    "audit-status",
+    `New run started. ${result.sessions_terminated} session(s) terminated, ` +
+      `${result.held_emails_denied} held message(s) denied, ` +
+      `${result.canaries_removed} decoys removed. The previous run is kept.`,
+    "ok"
+  );
+  renderTrace([]);
+  renderSessionState(null);
+  await loadAudit();
 }
 
 async function loadSessionPicker() {
@@ -957,6 +1030,8 @@ function init() {
   });
   document.getElementById("verify-button").addEventListener("click", verifyChain);
   document.getElementById("tamper-button").addEventListener("click", tamperChain);
+  document.getElementById("beacon-button").addEventListener("click", simulateBeacon);
+  document.getElementById("reset-button").addEventListener("click", resetDemo);
   document.getElementById("refresh-audit").addEventListener("click", () => loadAuditTable());
   document.getElementById("refresh-held").addEventListener("click", loadHeld);
   document.getElementById("hr-grant").addEventListener("click", () => setHrAccess(true));

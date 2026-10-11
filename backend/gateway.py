@@ -51,7 +51,7 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from backend import audit, config, database, detector, workspace
+from backend import alerts, audit, config, database, detector, workspace
 from backend.models import AgentSession
 
 logger = logging.getLogger(__name__)
@@ -409,28 +409,12 @@ def _quarantine(
         canary_ids=verdict.canary_ids,
     )
 
-    if verdict.rule == "read_time_quarantine":
-        title = "A decoy record was read"
-        message = (
-            f"The assistant asked to read {resource}. That file holds a decoy "
-            "record, so the contents were withheld and never reached the AI. "
-            "The session is paused until you decide what to do."
-        )
-    else:
-        title = "A file was too large to check"
-        message = (
-            f"The assistant asked to read {resource}, which is too large to "
-            "scan in full. The contents were withheld rather than returned "
-            "unchecked, and the session is paused."
-        )
-
-    database.create_alert(
+    alerts.quarantined_read(
         run_id=run_id,
         session_id=session.session_id,
-        severity="critical",
-        title=title,
-        message=message,
-        canary_ids=json.dumps(sorted(verdict.canary_ids)) if verdict.canary_ids else None,
+        resource=resource,
+        canary_ids=verdict.canary_ids,
+        scan_limit=verdict.rule == "scan_limit_exceeded",
     )
 
     return _result(
@@ -693,27 +677,11 @@ def _apply_outbound(
 
         if verdict.rule == "strong_canary_outbound":
             database.set_session_status(session.session_id, "terminated")
-            event_type = "EXFILTRATION_BLOCKED"
-            title = "An attempt to send a decoy record was blocked"
-            message = (
-                f"The assistant tried to email data to {recipient}. The message "
-                "contained a decoy record, which only existed in "
-                f"{', '.join(verdict.locations) or 'a company file'}. That file "
-                "has been read. Nothing was sent, and the session was stopped."
-            )
-        else:
-            event_type = "EXFILTRATION_BLOCKED"
-            title = "A bulk disclosure was blocked"
-            message = (
-                f"The assistant tried to email {verdict.personal_count} pieces of "
-                f"personal data to {recipient}, over the permitted limit. "
-                "Nothing was sent."
-            )
 
         audit.append_audit_event(
             run_id=run_id,
             session_id=session.session_id,
-            event_type=event_type,
+            event_type="EXFILTRATION_BLOCKED",
             tool=SEND_EMAIL,
             resource=recipient,
             decision=BLOCKED,
@@ -721,14 +689,21 @@ def _apply_outbound(
             reason=verdict.reason,
             canary_ids=verdict.canary_ids,
         )
-        database.create_alert(
-            run_id=run_id,
-            session_id=session.session_id,
-            severity="critical",
-            title=title,
-            message=message,
-            canary_ids=json.dumps(sorted(verdict.canary_ids)) if verdict.canary_ids else None,
-        )
+        if verdict.rule == "strong_canary_outbound":
+            alerts.blocked_send(
+                run_id=run_id,
+                session_id=session.session_id,
+                recipient=recipient,
+                locations=verdict.locations,
+                canary_ids=verdict.canary_ids,
+            )
+        else:
+            alerts.bulk_send_blocked(
+                run_id=run_id,
+                session_id=session.session_id,
+                recipient=recipient,
+                item_count=verdict.personal_count,
+            )
 
         return _result(
             SEND_EMAIL,
@@ -1109,17 +1084,10 @@ def revalidate_held_email(email_id: int) -> dict:
             ),
             canary_ids=verdict.canary_ids,
         )
-        database.create_alert(
+        alerts.approval_refused(
             run_id=email.run_id,
             session_id=email.session_id,
-            severity="critical",
-            title="An approval was refused",
-            message=(
-                f"An administrator approved a held message to {email.recipient}, "
-                "but rechecking it found something that can never be sent. "
-                "Nothing was sent."
-            ),
-            canary_ids=json.dumps(sorted(verdict.canary_ids)) if verdict.canary_ids else None,
+            recipient=email.recipient,
         )
         return {
             "email_id": email_id,

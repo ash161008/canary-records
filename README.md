@@ -25,15 +25,15 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stages 1–13 are complete**: the
+This repository is being built in stages. **Stages 1–14 are complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
 the decoy seeder, the detector, the tamper-evident audit log, the gateway
 itself, sessions with their administrator controls, the scripted agent, and the
 Claude agent, the measured scenario suite with its scoreboard, and the five
-connected screens. Alerts and reset (Stage 14) and the review stages come
-next, and the sections below will grow with them. Nothing in this README
-describes behaviour that does not yet run.
+connected screens, and the alerts, beacon simulation and demo reset. The
+review stages come next, and the sections below will grow with them. Nothing
+in this README describes behaviour that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -109,6 +109,9 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `GET` | `/api/alerts` | Administrator alerts for a run. |
 | `GET` | `/api/emails` | Simulated messages; `external_only` for the attacker outbox. |
 | `GET` | `/api/runs` | Every demo run, so earlier evidence stays reachable. |
+| `POST` | `/api/alerts/{id}/resolve` | Mark an alert dealt with. Admin. |
+| `POST` | `/api/beacon/{canary_id}` | Simulate a decoy being contacted. Admin, `DEMO_MODE=1` only. |
+| `POST` | `/api/reset` | Start a new demo run, keeping earlier runs. Admin. |
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
@@ -330,6 +333,32 @@ into an email.
 per scenario, so it runs only on an explicit admin request and never on page
 load; `POST /api/suite/run` defaults to the free deterministic worst-case
 matrix.
+
+### Alerts, and the reset
+
+Alerts are built in `backend/alerts.py` from what actually happened. Each one
+names the agent, the file, the destination and the session's state, and **never
+the file's contents** — that is asserted by test. They can be marked resolved;
+they are never deleted.
+
+If `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are both set, the same text is
+mirrored through the Telegram Bot API. That is best-effort: any failure is
+logged (by exception type only, since the URL contains the token) and the
+in-app alert stands. The relay sits on the path that raises a security alert,
+so it catches every exception rather than only `requests`' own — a broken
+mirror must never break a quarantine.
+
+`POST /api/beacon/{canary_id}` simulates someone outside contacting a decoy.
+A decoy's address exists in exactly one file, so a contact means that file has
+left the company. The alert says plainly that the contact is simulated, and
+nothing touches the network.
+
+`POST /api/reset` starts a new demo run. It restores the workspace by
+regenerating it, removes the decoys, terminates open sessions, denies messages
+still held, resolves open alerts, and opens a fresh audit chain at `GENESIS`.
+**Nothing is deleted** — no database, no source file. Earlier runs keep their
+audit events, alerts, messages and suite results, and all of it stays
+attributable to the run id it happened under.
 
 ### Databases
 
