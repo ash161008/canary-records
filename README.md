@@ -25,15 +25,15 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stages 1–11 and 13 are complete**: the
+This repository is being built in stages. **Stages 1–13 are complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
 the decoy seeder, the detector, the tamper-evident audit log, the gateway
 itself, sessions with their administrator controls, the scripted agent, and the
-Claude agent, and the measured scenario suite with its scoreboard. Stage 12
-(connecting the five screens) and the remaining stages come next, and the
-sections below will grow with them. Nothing in this README describes behaviour
-that does not yet run.
+Claude agent, the measured scenario suite with its scoreboard, and the five
+connected screens. Alerts and reset (Stage 14) and the review stages come
+next, and the sections below will grow with them. Nothing in this README
+describes behaviour that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -103,6 +103,12 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `POST` | `/api/run/claude/{id}/resume` | Carry on after an administrator's Continue. |
 | `POST` | `/api/suite/run` | Run the scenario suite for one agent across one or more modes. Admin. |
 | `GET` | `/api/suite/latest` | The stored scoreboards. Runs nothing. |
+| `GET` | `/api/inbox` | Inbox items a run can start from, with their raw bodies. |
+| `GET` | `/api/scenarios` | Scenarios a run can start from. |
+| `GET` | `/api/scenarios/{id}` | One scenario in full, for display. |
+| `GET` | `/api/alerts` | Administrator alerts for a run. |
+| `GET` | `/api/emails` | Simulated messages; `external_only` for the attacker outbox. |
+| `GET` | `/api/runs` | Every demo run, so earlier evidence stays reachable. |
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset

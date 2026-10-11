@@ -101,12 +101,39 @@
       administrator's decoy map. This map is visible on this screen only, and never to
       the agent.
     </p>
-    <div class="panel" id="seed-panel">
-      <p class="stage-note" data-stage="5 and 12">
-        Seeding, the per-location counts and the decoy map are wired to
-        <code>/api/workspace/seed</code>, <code>/api/workspace</code> and
-        <code>/api/canaries</code> in a later stage.
+    <div class="panel">
+      <div class="preset">
+        <div><span class="preset-label">Preset</span><strong>Retail SME</strong></div>
+        <div><span class="preset-label">Agent role</span><strong id="role-name">support_agent</strong></div>
+        <div><span class="preset-label">Data</span><strong>Synthetic demo data</strong></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="seed-button">Seed my workspace</button>
+        <button class="btn" id="unseed-button">Remove decoys</button>
+        <button class="btn" id="refresh-workspace">Refresh counts</button>
+      </div>
+      <p class="status" id="seed-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Records per location</h2>
+      <div id="workspace-counts" class="counts"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Administrator decoy map</h2>
+      <p class="stage-note">
+        Visible on this screen only, and never to the agent. Nothing in the
+        files themselves marks these records.
       </p>
+      <div class="table-scroll">
+        <table class="data-table" id="canary-table">
+          <thead>
+            <tr><th>Type</th><th>Location</th><th>Record</th><th>Unique values</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -118,12 +145,85 @@
       tool request pass through the gateway. Each run creates a new session, and the
       protection mode is fixed when that session is created.
     </p>
-    <div class="panel" id="run-panel">
-      <p class="stage-note" data-stage="10, 11 and 12">
-        The inbox picker, live trace, session controls, alert panel and attacker outbox
-        are wired to <code>/api/run/claude</code>, <code>/api/run/scripted</code>,
-        <code>/api/sessions/…</code> and <code>/api/alerts</code> in a later stage.
+    <div class="panel">
+      <div class="run-setup">
+        <label class="field">
+          <span>Incoming message</span>
+          <select id="message-select"></select>
+        </label>
+        <label class="field">
+          <span>Protection</span>
+          <select id="protection-select">
+            <option value="protect">protect — everything enforced</option>
+            <option value="outbound_only">outbound-only — layer test</option>
+            <option value="monitor">monitor — unprotected baseline</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Agent</span>
+          <select id="agent-select"></select>
+        </label>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn btn-primary" id="run-button">Run</button>
+        </div>
+      </div>
+      <p class="stage-note">
+        The protection mode is fixed when the run starts. To compare modes, run
+        again.
       </p>
+      <p class="status" id="run-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">The message as received</h2>
+        <button class="btn btn-small" id="hidden-toggle" aria-pressed="false">
+          Show hidden text
+        </button>
+      </div>
+      <p class="meta" id="message-meta"></p>
+      <pre class="message-body" id="message-body"></pre>
+    </div>
+
+    <div class="run-grid">
+      <div class="panel">
+        <h2 class="panel-title">Gateway decisions, in order</h2>
+        <div class="table-scroll">
+          <table class="data-table" id="trace-table">
+            <thead>
+              <tr><th>#</th><th>Tool</th><th>Resource</th><th>Decision</th><th>Rule</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="session-state" id="session-state"></div>
+        <div class="actions" id="session-actions"></div>
+      </div>
+
+      <div class="phone" aria-label="Simulated administrator alert">
+        <div class="phone-notch" aria-hidden="true"></div>
+        <div class="phone-screen">
+          <p class="phone-title">Simulated administrator alert</p>
+          <div id="alert-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Attacker outbox</h2>
+      <p class="stage-note">
+        Messages addressed outside <code>limco.example</code>. Nothing was ever
+        sent; each row is the whole of the attempt.
+      </p>
+      <div class="table-scroll">
+        <table class="data-table" id="outbox-table">
+          <thead>
+            <tr><th>Recipient</th><th>Subject</th><th>Status</th><th>Rule</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -134,12 +234,81 @@
       Every gateway decision and every administrator action, hash-chained per demo run.
       Verification reports exactly which entry was altered.
     </p>
-    <div class="panel" id="audit-panel">
-      <p class="stage-note" data-stage="7, 9, 12 and 14">
-        The audit table, chain verification, held-email review, HR access toggle and
-        beacon simulation are wired to <code>/api/audit</code>,
-        <code>/api/emails/held</code> and <code>/api/beacon/…</code> in a later stage.
+    <div class="panel">
+      <div class="run-setup">
+        <label class="field">
+          <span>Demo run</span>
+          <select id="run-select"></select>
+        </label>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn" id="verify-button">Verify chain</button>
+        </div>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn" id="tamper-button">Edit oldest entry (demo)</button>
+        </div>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn" id="beacon-button" disabled
+                  title="The beacon simulation arrives in Stage 14.">
+            Simulate beacon hit
+          </button>
+        </div>
+      </div>
+      <p class="status" id="audit-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Held messages</h2>
+        <button class="btn btn-small" id="refresh-held">Refresh</button>
+      </div>
+      <p class="stage-note">
+        Only a message held for review can be approved. Approving re-runs the
+        whole outbound policy; a message that was blocked outright can never be
+        approved, and the backend refuses it whatever this screen shows.
       </p>
+      <div id="held-list"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">HR access</h2>
+      <p class="stage-note">
+        Granting HR access lets a session read <code>hr/</code>. Removing it
+        stops the next read, even mid-run.
+      </p>
+      <div class="run-setup">
+        <label class="field">
+          <span>Session</span>
+          <select id="hr-session-select"></select>
+        </label>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn" id="hr-grant">Grant HR access</button>
+        </div>
+        <div class="field field-action">
+          <span aria-hidden="true">&nbsp;</span>
+          <button class="btn" id="hr-remove">Remove HR access</button>
+        </div>
+      </div>
+      <p class="status" id="hr-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Audit log</h2>
+        <button class="btn btn-small" id="refresh-audit">Refresh</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="audit-table">
+          <thead>
+            <tr><th>#</th><th>Event</th><th>Tool</th><th>Resource</th>
+                <th>Decision</th><th>Rule</th><th>Recorded</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -151,13 +320,20 @@
       versus targeted attacks. Every number here is computed from runs that actually
       executed.
     </p>
-    <div class="panel" id="scoreboard-panel">
-      <p class="stage-note" data-stage="13">
-        The suite runner and metrics are wired to <code>/api/suite/run</code> and
-        <code>/api/suite/latest</code> in a later stage. No figure is shown until a
-        suite has run.
+    <div class="panel">
+      <div class="actions">
+        <button class="btn" id="load-scores">Load latest results</button>
+        <button class="btn" id="run-suite">Run worst-case suite</button>
+      </div>
+      <p class="stage-note">
+        The worst-case suite is deterministic and free. A Claude suite costs
+        money per scenario, so it is started from the command line
+        (<code>scripts/run_claude_suite.py</code>) and never by this screen.
       </p>
+      <p class="status" id="score-status" role="status" aria-live="polite"></p>
     </div>
+
+    <div id="scoreboards"></div>
   </section>
 
 </main>

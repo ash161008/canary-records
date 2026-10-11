@@ -730,13 +730,38 @@ def test_the_scenario_summary_withholds_the_body(world):
 
 
 def test_the_frontend_never_hard_codes_an_agent_label():
-    """Guard for Stage 12: the label must be rendered from the API response.
+    """Guard for the run picker: the label must come from the API.
 
-    The backend sends `agent_label` on every run and session response. If the
-    frontend spelled a label itself the two could drift, and the scripted
-    stress-test agent could end up presented as the demo agent.
+    The backend sends `agent_label` on every run and session response, and
+    /api/agents supplies the picker. If the frontend spelled a label itself
+    the two could drift, and the scripted stress-test agent could end up
+    presented as the demo agent.
+
+    What is checked is a label used as a *rendered value* - an <option>'s
+    text, or a bare string literal in the script. Naming Claude in
+    explanatory prose is fine and useful, so prose is not caught.
     """
-    for name in ("index.html", "app.js"):
-        source = (config.BASE_DIR / "frontend" / name).read_text()
-        for label in config.AGENT_LABELS.values():
-            assert label not in source, f"{name} hard-codes {label!r}"
+    import re
+
+    html = (config.BASE_DIR / "frontend" / "index.html").read_text()
+    js = (config.BASE_DIR / "frontend" / "app.js").read_text()
+
+    options = re.findall(r"<option[^>]*>([^<]*)</option>", html)
+    for label in config.AGENT_LABELS.values():
+        assert label not in [text.strip() for text in options], (
+            f"index.html renders {label!r} as an <option>"
+        )
+
+    literals = re.findall(r"[\"']([^\"'\n]{1,60})[\"']", js)
+    for label in config.AGENT_LABELS.values():
+        assert label not in literals, f"app.js contains {label!r} as a literal"
+
+
+def test_the_agent_picker_is_populated_from_the_backend():
+    """The markup declares an empty select; the script fills it."""
+    html = (config.BASE_DIR / "frontend" / "index.html").read_text()
+    js = (config.BASE_DIR / "frontend" / "app.js").read_text()
+
+    assert '<select id="agent-select"></select>' in html
+    assert "/api/agents" in js
+    assert "agent.agent_label" in js

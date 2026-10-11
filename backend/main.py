@@ -375,10 +375,18 @@ def run_scripted(request: RunScriptedRequest) -> dict:
     by the gateway rather than declined by a model.
     """
     try:
-        return agent_scripted.run_scenario(
-            scenario_id=request.scenario_id,
-            protection_mode=request.protection_mode,
+        scenario = _find_scenario(request.scenario_id)
+        session = agent_scripted.session_for_scenario(
+            scenario, request.protection_mode
         )
+        outcome = agent_scripted.run_scripted(
+            session.session_id, scenario["intended_tool_calls"]
+        )
+        outcome["scenario_id"] = scenario["id"]
+        outcome["scenario_type"] = scenario["scenario_type"]
+        outcome["category"] = scenario["category"]
+        outcome["expected_protect_outcome"] = scenario.get("expected_protect_outcome")
+        return outcome
     except scenarios.ScenarioError as error:
         raise HTTPException(status_code=404, detail=str(error))
     except Exception:
@@ -391,7 +399,11 @@ def run_scripted(request: RunScriptedRequest) -> dict:
 class RunClaudeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    inbox_id: str = Field(min_length=1, max_length=80)
+    # One or the other. An inbox item is the ordinary demo path; a scenario id
+    # runs one entry from the suite, which is how the live demo drives the
+    # harder injection scenes.
+    inbox_id: str | None = Field(default=None, min_length=1, max_length=80)
+    scenario_id: str | None = Field(default=None, min_length=1, max_length=40)
     protection_mode: ProtectionMode
 
 
@@ -402,11 +414,24 @@ def run_claude(request: RunClaudeRequest) -> dict:
     The inbox item is loaded by the backend, not named by the model. Every
     tool the model asks for is executed by the gateway.
     """
+    if bool(request.inbox_id) == bool(request.scenario_id):
+        raise HTTPException(
+            status_code=422,
+            detail="Give exactly one of inbox_id or scenario_id.",
+        )
+
     try:
+        if request.scenario_id:
+            scenario = _find_scenario(request.scenario_id)
+            return agent_claude.run_claude_for_scenario(
+                scenario, protection_mode=request.protection_mode
+            )
         return agent_claude.run_claude(
             inbox_id=request.inbox_id,
             protection_mode=request.protection_mode,
         )
+    except scenarios.ScenarioError as error:
+        raise HTTPException(status_code=404, detail=str(error))
     except agent_claude.ClaudeNotConfigured as error:
         raise HTTPException(status_code=503, detail=str(error))
     except ValueError as error:
@@ -489,4 +514,152 @@ def latest_suite() -> dict:
         "has_results": board is not None,
         "latest": board,
         "all": scenarios.all_scoreboards(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# What the interface needs to drive a run
+# ---------------------------------------------------------------------------
+
+
+def _find_scenario(scenario_id: str) -> dict:
+    """One scenario from the measured suite or the extra probes."""
+    for scenario in scenarios.load_all() + scenarios.load_file(
+        scenarios.HARD_INJECTIONS_FILE
+    ):
+        if scenario["id"] == scenario_id:
+            return scenario
+    raise scenarios.ScenarioError(f"No such scenario: {scenario_id!r}")
+
+
+@app.get("/api/inbox")
+def get_inbox() -> dict:
+    """The inbox items a run can be started from.
+
+    The raw body is included, hidden HTML and all: the interface shows the
+    message as a reader would see it and can reveal the hidden parts on
+    request. Revealing them changes presentation only.
+    """
+    try:
+        items = sessions.list_inbox()
+    except Exception:
+        logger.exception("reading the inbox failed")
+        raise HTTPException(
+            status_code=500, detail="Could not read the inbox; see server log."
+        )
+    return {"count": len(items), "items": items}
+
+
+@app.get("/api/scenarios")
+def get_scenarios() -> dict:
+    """Every scenario a run can be started from, grouped by source."""
+    suite = scenarios.list_scenarios()
+    try:
+        extra = scenarios.load_file(scenarios.HARD_INJECTIONS_FILE)
+    except scenarios.ScenarioError:
+        extra = []
+
+    return {
+        "suite": suite,
+        "probes": [
+            {
+                "id": item["id"],
+                "scenario_type": item["scenario_type"],
+                "category": item["category"],
+                "from": item["from"],
+                "subject": item["subject"],
+                "expected_protect_outcome": item["expected_protect_outcome"],
+                "intended_tool_call_count": len(item["intended_tool_calls"]),
+            }
+            for item in extra
+        ],
+    }
+
+
+@app.get("/api/scenarios/{scenario_id}")
+def get_scenario(scenario_id: str) -> dict:
+    """One scenario in full, including its raw body, for display."""
+    try:
+        scenario = _find_scenario(scenario_id)
+    except scenarios.ScenarioError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+    return scenario
+
+
+@app.get("/api/alerts")
+def get_alerts(run_id: str | None = None, status: str | None = None) -> dict:
+    """Administrator alerts, newest first.
+
+    Alerts are built by the backend from what actually happened. They name
+    files and decisions, never file contents.
+    """
+    resolved = _resolve_run_id(run_id)
+    alerts = database.list_alerts(run_id=resolved, status=status)
+    return {
+        "run_id": resolved,
+        "count": len(alerts),
+        "alerts": [alert.model_dump() for alert in alerts],
+    }
+
+
+@app.get("/api/emails")
+def get_emails(run_id: str | None = None, external_only: bool = False) -> dict:
+    """Simulated messages for a run.
+
+    ``external_only`` keeps just those addressed outside the company, which
+    is what the attacker outbox shows.
+    """
+    resolved = _resolve_run_id(run_id)
+    emails = database.list_simulated_emails(run_id=resolved)
+    if external_only:
+        emails = [
+            email
+            for email in emails
+            if not config.is_internal_recipient(email.recipient)
+        ]
+    return {
+        "run_id": resolved,
+        "count": len(emails),
+        "emails": [
+            {
+                **email.model_dump(),
+                "internal": config.is_internal_recipient(email.recipient),
+            }
+            for email in emails
+        ],
+    }
+
+
+@app.get("/api/runs")
+def get_runs() -> dict:
+    """Every demo run, newest first, so earlier evidence stays reachable."""
+    runs = database.list_demo_runs()
+    current = database.get_active_demo_run()
+    return {
+        "current_run_id": current.run_id if current else None,
+        "count": len(runs),
+        "runs": [
+            {
+                **run.model_dump(),
+                "session_count": len(database.list_sessions(run_id=run.run_id)),
+                "event_count": len(database.list_audit_events(run_id=run.run_id)),
+            }
+            for run in runs
+        ],
+    }
+
+
+@app.get("/api/agents")
+def get_agents() -> dict:
+    """The agents a run can be started with, and how each is named.
+
+    The interface renders these names rather than spelling its own, so the
+    scripted stress-test agent can never be presented as the demo agent.
+    """
+    return {
+        "selectable": [
+            {"agent_mode": mode, "agent_label": config.agent_label(mode)}
+            for mode in ("claude", "worst_case")
+        ],
+        "labels": dict(config.AGENT_LABELS),
     }
