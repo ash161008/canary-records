@@ -46,7 +46,7 @@ agent's tool paths cannot reach.
 ## Architecture
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph outside["Outside the company"]
         EMAIL["Incoming email<br/>(may carry hidden instructions)"]
         ATTACKER["Attacker address<br/>*.test"]
