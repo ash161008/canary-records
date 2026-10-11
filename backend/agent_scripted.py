@@ -246,15 +246,22 @@ def run_scripted(session_id: str, tool_calls: list[dict]) -> dict:
 
 
 def session_for_scenario(
-    scenario: dict, protection_mode: str, run_id: str | None = None
+    scenario: dict,
+    protection_mode: str,
+    run_id: str | None = None,
+    agent_mode: str | None = None,
 ) -> AgentSession:
     """Create a session for one scenario.
 
     The task context comes from the scenario's own ``from`` and
     ``authorised_recipients`` - set by the backend, exactly as it would be from
     an inbox item, and never from anything the agent says.
+
+    ``agent_mode`` defaults to the scripted agent for the scenario's type; the
+    Claude runner passes ``claude`` so the first audit entry names the agent
+    that is actually running.
     """
-    agent_mode = (
+    agent_mode = agent_mode or (
         "scripted_normal" if scenario["scenario_type"] == "normal" else "worst_case"
     )
     run = run_id or database.get_or_create_active_demo_run().run_id

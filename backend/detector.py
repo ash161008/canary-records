@@ -896,6 +896,29 @@ def _owner_index() -> dict[str, list[Owner]]:
     return index
 
 
+def _record_postal_codes() -> set[str]:
+    customers, _staff = _load_records()
+    return {row["postal_code"].strip() for row in customers if row.get("postal_code")}
+
+
+def matches_record(item: PersonalItem) -> bool:
+    """Is this item a value that actually appears in the customer or staff records?
+
+    Wider than ``owner_lookup`` on purpose. Ownership is decided by unique
+    identifiers only, so a postal code never has an owner - but a postal code
+    taken from a customer record is still that customer's data, and a message
+    made only of such values must still count as a disclosure. An address that
+    no record holds (an attacker's own, say) does not.
+    """
+    if item.kind in ("email", "phone", "staff_id", "identifier"):
+        found = next(iter(owner_lookup([item]).values()))
+        return found is not None
+    if item.kind == "postal_code":
+        return item.value in _record_postal_codes()
+    # NRIC-shaped strings appear in no record, but nothing legitimate sends one.
+    return item.kind == "nric"
+
+
 def owner_lookup(items) -> dict[str, Owner | str | None]:
     """Map each item to the record that owns it.
 
