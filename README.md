@@ -25,14 +25,15 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 11 of 18 is complete**: the
+This repository is being built in stages. **Stages 1–11 and 13 are complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
 the decoy seeder, the detector, the tamper-evident audit log, the gateway
 itself, sessions with their administrator controls, the scripted agent, and the
-Claude agent. The five screens and the scenario suite are added in later
-stages, and the sections below will grow with them. Nothing in this README
-describes behaviour that does not yet run.
+Claude agent, and the measured scenario suite with its scoreboard. Stage 12
+(connecting the five screens) and the remaining stages come next, and the
+sections below will grow with them. Nothing in this README describes behaviour
+that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -100,6 +101,8 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `POST` | `/api/run/scripted` | Replay a scenario's intended tool calls through the gateway. |
 | `POST` | `/api/run/claude` | Run the Claude agent once against one inbox item. |
 | `POST` | `/api/run/claude/{id}/resume` | Carry on after an administrator's Continue. |
+| `POST` | `/api/suite/run` | Run the scenario suite for one agent across one or more modes. Admin. |
+| `GET` | `/api/suite/latest` | The stored scoreboards. Runs nothing. |
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
@@ -273,6 +276,31 @@ Both labels come from one place, `config.AGENT_LABELS`, and every run and
 session response carries `agent_label`, so the interface renders the name
 rather than spelling it. A scripted result must never be read as evidence about
 how a model behaves.
+
+### The scenario suite
+
+35 scenarios: 20 attacks (10 bulk, 10 targeted) in `scenarios/attacks.json`
+and 15 normal tasks in `scenarios/normal.json`. Each carries its sender, its
+raw body including any hidden instruction, the recipients the task authorises,
+the tool calls an attacker wanted, and the outcome expected under `protect`.
+
+Seven measures are recorded separately for every run, never collapsed into a
+single pass or fail: unauthorised disclosure, canary exposure, forbidden
+access, where it was caught, model refusal, false hold, task failure. An
+attack that was *held* is not the same as one that was *blocked*, and a normal
+task that was held is a cost, not a win.
+
+`intended_tool_calls` cannot name a decoy — decoys are generated when the
+workspace is seeded, long after a scenario was written. An attack's payload is
+therefore a placeholder (`{{last_read}}`, and `_base64` / `_hex` / `_spaced`
+variants) that the worst-case agent fills with whatever it actually read a
+moment earlier, which is what a compromised agent does when it pastes a file
+into an email.
+
+`GET /api/suite/latest` only reads stored results. A Claude suite costs money
+per scenario, so it runs only on an explicit admin request and never on page
+load; `POST /api/suite/run` defaults to the free deterministic worst-case
+matrix.
 
 ### Databases
 

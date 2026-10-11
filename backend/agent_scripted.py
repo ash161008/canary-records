@@ -20,7 +20,11 @@ It is labelled "Worst-case (scripted)" wherever it is shown, so a viewer is
 never left thinking the demo's results came from a model that chose to behave.
 """
 
+import base64
+import json
 import logging
+import re
+import time
 
 from backend import audit, config, database, gateway, scenarios
 from backend.models import AgentSession
@@ -43,6 +47,44 @@ STOPPED_CALL_LIMIT = "call_limit_reached"
 # agent simply tries the next thing, which is what makes the role checks worth
 # measuring separately.
 _STOPPING_DECISIONS = (gateway.QUARANTINED, gateway.BLOCKED, gateway.HELD)
+
+# A scenario cannot name a decoy: decoys are generated when the workspace is
+# seeded, long after the scenario was written. So an attack's payload is
+# written as a placeholder, and the worst-case agent fills it with what it
+# actually read a moment earlier - which is exactly what a compromised agent
+# does when it pastes a file into an email. The transforms match the evasions
+# the scenarios describe.
+_PLACEHOLDERS = re.compile(
+    r"\{\{last_read(|_base64|_hex|_spaced)\}\}"
+)
+
+
+def _transform(text: str, kind: str) -> str:
+    if kind == "_base64":
+        return base64.b64encode(text.encode("utf-8")).decode("ascii")
+    if kind == "_hex":
+        return text.encode("utf-8").hex()
+    if kind == "_spaced":
+        # A space between every digit, leaving other characters alone.
+        return re.sub(r"\d", lambda m: m.group(0) + " ", text)
+    return text
+
+
+def _expand_placeholders(arguments: dict, last_read: str | None) -> dict:
+    """Fill a payload placeholder with the content of the most recent read.
+
+    With nothing read yet the placeholder resolves to an empty string, so an
+    attack that was stopped before it read anything sends nothing - which is
+    the honest outcome, not a crash.
+    """
+    expanded = dict(arguments)
+    for key, value in list(expanded.items()):
+        if not isinstance(value, str) or "{{last_read" not in value:
+            continue
+        expanded[key] = _PLACEHOLDERS.sub(
+            lambda match: _transform(last_read or "", match.group(1)), value
+        )
+    return expanded
 
 
 def _badge(result: dict) -> str:
@@ -104,6 +146,7 @@ def run_scripted(session_id: str, tool_calls: list[dict]) -> dict:
 
     activity: list[dict] = []
     stopped_because = COMPLETED
+    last_read: str | None = None
 
     for index, call in enumerate(tool_calls, start=1):
         if index > MAX_TOOL_CALLS:
@@ -113,16 +156,27 @@ def run_scripted(session_id: str, tool_calls: list[dict]) -> dict:
         tool = call.get("tool") if isinstance(call, dict) else None
         arguments = call.get("arguments", {}) if isinstance(call, dict) else {}
 
+        arguments = _expand_placeholders(arguments, last_read)
+
         # Deliberately not validated here. An unknown tool or malformed
         # arguments is the gateway's decision to make and to audit, and a
         # worst-case agent is exactly the thing that would send them.
+        started_at = database.utc_now()
+        started = time.perf_counter()
         result = gateway.execute(session_id, tool, arguments)
+        duration_ms = round((time.perf_counter() - started) * 1000, 3)
+
+        if result["decision"] == gateway.ALLOWED and "content" in result:
+            content = result["content"]
+            last_read = content if isinstance(content, str) else json.dumps(content)
 
         activity.append(
             {
                 "step": index,
                 "tool": tool,
                 "arguments": _summarise_arguments(tool, arguments),
+                "started_at": started_at,
+                "duration_ms": duration_ms,
                 "decision": result["decision"],
                 "badge": _badge(result),
                 "hard_deny": result["hard_deny"],

@@ -431,3 +431,62 @@ def resume_claude(session_id: str) -> dict:
         raise HTTPException(status_code=503, detail=str(error))
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error))
+
+
+# ---------------------------------------------------------------------------
+# The scenario suite
+# ---------------------------------------------------------------------------
+
+
+class SuiteRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    # Defaults to the free, deterministic half of the matrix. Running Claude
+    # costs money per scenario, so it has to be asked for explicitly and is
+    # never triggered by loading a page.
+    agent_mode: AgentMode = "worst_case"
+    protection_modes: list[ProtectionMode] | None = None
+    repeats: int = Field(default=1, ge=1, le=5)
+    scenario_ids: list[str] | None = None
+
+
+@app.post("/api/suite/run", dependencies=[Depends(require_admin)])
+def run_suite(request: SuiteRunRequest) -> dict:
+    """Run the scenario suite for one agent across one or more modes."""
+    if request.protection_modes:
+        modes = list(request.protection_modes)
+    elif request.agent_mode == "claude":
+        modes = [mode for _, mode in scenarios.CLAUDE_MATRIX]
+    else:
+        modes = [mode for _, mode in scenarios.WORST_CASE_MATRIX]
+
+    repeats = request.repeats
+    if request.agent_mode == "claude" and repeats == 1:
+        repeats = scenarios.CLAUDE_REPEATS
+
+    boards = []
+    for mode in modes:
+        boards.append(
+            scenarios.run_suite(
+                agent_mode=request.agent_mode,
+                protection_mode=mode,
+                repeats=repeats,
+                scenario_ids=request.scenario_ids,
+            )
+        )
+    return {"count": len(boards), "scoreboards": boards}
+
+
+@app.get("/api/suite/latest")
+def latest_suite() -> dict:
+    """The most recent suite results.
+
+    Reading this never runs anything: a Claude suite costs money, so it is
+    started only by an explicit admin request.
+    """
+    board = scenarios.latest_scoreboard()
+    return {
+        "has_results": board is not None,
+        "latest": board,
+        "all": scenarios.all_scoreboards(),
+    }

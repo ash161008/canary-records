@@ -24,6 +24,7 @@ or the browser.
 
 import json
 import logging
+import time
 
 import anthropic
 
@@ -245,7 +246,14 @@ def _tool_result_content(result: dict) -> str:
     return result.get("reason") or WITHHELD_MESSAGE
 
 
-def _activity_entry(step: int, name: str, arguments: dict, result: dict) -> dict:
+def _activity_entry(
+    step: int,
+    name: str,
+    arguments: dict,
+    result: dict,
+    started_at: str | None = None,
+    duration_ms: float | None = None,
+) -> dict:
     """One row of the live trace. Mirrors the scripted agent's shape."""
     rule = result.get("rule") or ""
     badge = result["decision"]
@@ -265,6 +273,8 @@ def _activity_entry(step: int, name: str, arguments: dict, result: dict) -> dict
         "step": step,
         "tool": name,
         "arguments": shown,
+        "started_at": started_at,
+        "duration_ms": duration_ms,
         "decision": result["decision"],
         "badge": badge,
         "hard_deny": result["hard_deny"],
@@ -504,9 +514,19 @@ def _run_loop(
 
         for block in tool_uses:
             arguments = block.input if isinstance(block.input, dict) else {}
+            started_at = database.utc_now()
+            started = time.perf_counter()
             result = gateway.execute(session_id, block.name, arguments)
+            duration_ms = round((time.perf_counter() - started) * 1000, 3)
             activity.append(
-                _activity_entry(len(activity) + 1, block.name, arguments, result)
+                _activity_entry(
+                    len(activity) + 1,
+                    block.name,
+                    arguments,
+                    result,
+                    started_at=started_at,
+                    duration_ms=duration_ms,
+                )
             )
             tool_results.append(
                 {
@@ -643,3 +663,54 @@ def resume_claude(session_id: str, client=None) -> dict:
     # The last turn already carries the tool_result the gateway produced,
     # which is the refusal. Nothing is rewritten here; the loop simply goes on.
     return _run_loop(session, list(messages), active_client, activity=[])
+
+
+def run_claude_for_scenario(
+    scenario: dict, protection_mode: str, run_id: str | None = None, client=None
+) -> dict:
+    """Run the Claude agent against one scenario from the suite.
+
+    The scenario stands in for an inbox item: its ``from`` sets the session's
+    task context and its raw body - hidden instructions included - is what the
+    model reads. ``intended_tool_calls`` is ignored here on purpose. That list
+    is what an *attacker* wanted; Claude decides for itself what to request,
+    and the gateway decides what happens. Using it would make this a replay
+    rather than a run.
+    """
+    from backend import agent_scripted
+
+    active_client = client or build_client()
+    session = agent_scripted.session_for_scenario(
+        scenario, protection_mode, run_id=run_id
+    )
+
+    # The session was created with the scripted agent's helper, which records
+    # the task context; the agent mode is corrected to claude so the
+    # scoreboard attributes the run properly.
+    with database.app_connection() as connection:
+        connection.execute(
+            "UPDATE agent_sessions SET agent_mode = 'claude' WHERE session_id = ?",
+            (session.session_id,),
+        )
+    session = database.get_session(session.session_id)
+
+    logger.info(
+        "Claude scenario run: session=%s scenario=%s model=%s sdk=%s mode=%s",
+        session.session_id,
+        scenario["id"],
+        config.CLAUDE_MODEL,
+        SDK_VERSION,
+        protection_mode,
+    )
+
+    messages = [
+        {
+            "role": "user",
+            "content": wrap_untrusted_email(
+                scenario["from"], f"Subject: {scenario['subject']}\n\n{scenario['body']}"
+            ),
+        }
+    ]
+    outcome = _run_loop(session, messages, active_client, activity=[])
+    outcome["scenario_id"] = scenario["id"]
+    return outcome

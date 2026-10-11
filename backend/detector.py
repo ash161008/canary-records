@@ -585,18 +585,24 @@ def find_canaries(text: str) -> Findings:
     return Findings(confidence=confidence, matches=matches, truncated=truncated)
 
 
-def _match_canaries(prepared: str) -> tuple[str, list[CanaryMatch]]:
+def _match_canaries(
+    prepared: str, candidates: list[str] | None = None
+) -> tuple[str, list[CanaryMatch]]:
     """Match every active decoy against already-prepared text.
 
-    Split out so that ``scan`` can prepare the text once and run both the
-    canary match and the personal-item extraction over it.
+    Split out so that ``scan`` can prepare the text once, decode it once, and
+    run both the canary match and the personal-item extraction over the same
+    material.
     """
     canaries = load_active_canaries()
     if not canaries:
         return NONE, []
 
+    if candidates is None:
+        candidates = decode_candidates(prepared)
+
     indexes = [_TextIndex(prepared)]
-    indexes.extend(_TextIndex(candidate) for candidate in decode_candidates(prepared))
+    indexes.extend(_TextIndex(candidate) for candidate in candidates)
 
     matches: list[CanaryMatch] = []
     for canary in canaries:
@@ -656,7 +662,13 @@ class PersonalItem:
 
 
 def extract_personal(text: str) -> list[PersonalItem]:
-    """Personal data items in ``text``, deduplicated.
+    """Personal data items in ``text`` as written, deduplicated.
+
+    This reads the text literally: it does not decode base64, hex or
+    URL-encoded content. ``scan()`` is what the gateway calls, and it does
+    collect items from decoded candidates too. Use this where literal
+    position matters - asking whether a value appears *inside a URL*, for
+    instance - and ``scan()`` for a decision.
 
     Phones, emails, staff ids, six-digit postal codes and NRIC/FIN-shaped
     strings. Matched spans are masked as they are consumed, so digits inside a
@@ -788,9 +800,24 @@ def scan(text: str) -> ScanResult:
 
     truncated = exceeds_scan_limit(text)
     prepared = _prepare(text)[:MAX_INPUT_BYTES]
+    candidates = decode_candidates(prepared)
 
-    confidence, matches = _match_canaries(prepared)
-    personal = _extract_personal(prepared)
+    confidence, matches = _match_canaries(prepared, candidates)
+
+    # Personal items are collected from the decoded candidates as well as the
+    # text as written. Without this, encoding a customer list as hex or base64
+    # would hide it from the outbound volume limit and the data-owner rule,
+    # even though the very same decoding already exposes a decoy to the canary
+    # match. The two halves have to see the same material or the asymmetry is
+    # itself the evasion.
+    personal: list[PersonalItem] = []
+    seen: set[tuple[str, str]] = set()
+    for source in (prepared, *candidates):
+        for item in _extract_personal(source):
+            key = (item.kind, item.value)
+            if key not in seen:
+                seen.add(key)
+                personal.append(item)
 
     return ScanResult(
         confidence=confidence,
