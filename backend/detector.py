@@ -115,6 +115,11 @@ _HEX_BLOCK = re.compile(
     rf"(?<![A-Za-z0-9])[0-9a-fA-F]{{{MIN_BLOCK_CHARS},{MAX_BLOCK_CHARS}}}(?![A-Za-z0-9])"
 )
 _PERCENT_ESCAPE = re.compile(r"%[0-9A-Fa-f]{2}")
+# A block longer than MAX_BLOCK_CHARS is not matched by the patterns above,
+# so its tail would be skipped in silence. These find such a run so the scan
+# can declare itself incomplete instead.
+_OVERSIZED_BASE64 = re.compile(r"(?<![A-Za-z0-9+/=])[A-Za-z0-9+/]{{{0},}}".format(MAX_BLOCK_CHARS + 1))
+_OVERSIZED_HEX = re.compile(r"(?<![A-Za-z0-9])[0-9a-fA-F]{{{0},}}".format(MAX_BLOCK_CHARS + 1))
 
 _WORD = re.compile(r"[A-Za-z0-9'@.+\-]+")
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
@@ -337,19 +342,34 @@ def _decode_bytes(raw: bytes) -> str | None:
 
 
 def decode_candidates(text: str) -> list[str]:
+    """Decoded strings hidden inside ``text``. See _decode_with_status."""
+    return _decode_with_status(text)[0]
+
+
+def _decode_with_status(text: str) -> tuple[list[str], bool]:
     """Decoded strings hidden inside ``text``, one level deep.
 
     Bounded on purpose: the input is capped at 200 KB, at most 50 candidates
     are returned, blocks must be 16 to 4096 characters, and a candidate is
     never itself decoded again. That keeps the cost of scanning a hostile
     message predictable.
+
+    Returns the decoded candidates and whether decoding examined
+    everything. False means a budget was reached - the candidate cap, or
+    an encoded block too long to match - and the caller must treat the
+    scan as incomplete rather than clean.
     """
     if not text:
-        return []
+        return [], True
 
     source = _prepare(text)[:MAX_INPUT_BYTES]
     candidates: list[str] = []
     seen: set[str] = {source}
+    # An encoded run too long for the block patterns is skipped by them,
+    # so the scan cannot claim to have seen the whole message.
+    complete = not (
+        _OVERSIZED_BASE64.search(source) or _OVERSIZED_HEX.search(source)
+    )
 
     def offer(decoded: str | None) -> bool:
         """Returns False once the candidate cap is reached."""
@@ -379,7 +399,7 @@ def decode_candidates(text: str) -> list[str]:
         except (binascii.Error, ValueError):
             continue
         if not offer(_decode_bytes(raw)):
-            return candidates
+            return candidates, False
 
     for match in _HEX_BLOCK.finditer(source):
         block = match.group(0)
@@ -390,9 +410,9 @@ def decode_candidates(text: str) -> list[str]:
         except ValueError:
             continue
         if not offer(_decode_bytes(raw)):
-            return candidates
+            return candidates, False
 
-    return candidates
+    return candidates, complete
 
 
 # ---------------------------------------------------------------------------
@@ -798,9 +818,17 @@ def scan(text: str) -> ScanResult:
     if not text:
         return ScanResult()
 
-    truncated = exceeds_scan_limit(text)
-    prepared = _prepare(text)[:MAX_INPUT_BYTES]
-    candidates = decode_candidates(prepared)
+    # The limit is measured on the text as it will actually be scanned.
+    # Normalisation can expand the input, so checking the raw length alone
+    # would let the slice below discard content while this flag stayed False.
+    normalised = _prepare(text)
+    truncated = exceeds_scan_limit(text) or len(normalised) > MAX_INPUT_BYTES
+    prepared = normalised[:MAX_INPUT_BYTES]
+    candidates, decoding_complete = _decode_with_status(prepared)
+    if not decoding_complete:
+        # Decoding hit a budget. Part of the message was never examined, so
+        # this scan cannot be reported as clean.
+        truncated = True
 
     confidence, matches = _match_canaries(prepared, candidates)
 

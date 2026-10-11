@@ -532,8 +532,30 @@ def _urls_in(text: str) -> list[str]:
 
 
 def _host_of(url: str) -> str:
+    """The host part of a URL, lowercased.
+
+    A URL that cannot be parsed - a malformed bracketed host such as
+    ``https://[abc`` - returns a sentinel that is deliberately not a valid
+    host and never matches the internal domain, so an unparseable link is
+    treated as external rather than raising out of the gateway or, worse,
+    being read as absent and allowed through.
+    """
     candidate = url if "://" in url else f"http://{url}"
-    return (urlsplit(candidate).hostname or "").lower()
+    try:
+        return (urlsplit(candidate).hostname or "").lower()
+    except ValueError:
+        return "unparseable.invalid"
+
+
+def _is_internal_host(host: str) -> bool:
+    """True only for the company domain itself or a real subdomain of it.
+
+    A plain endswith would accept ``evil-limco.example`` for a company
+    domain of ``limco.example``, which is an attacker-controlled host.
+    """
+    host = (host or "").strip().lower().rstrip(".")
+    domain = config.INTERNAL_DOMAIN.strip().lower().rstrip(".")
+    return bool(host) and (host == domain or host.endswith("." + domain))
 
 
 def _authorised_recipients(session: AgentSession) -> set[str]:
@@ -707,7 +729,7 @@ def _outbound_verdict(
             )
 
     if disclosed_count and any(
-        host and not host.endswith(config.INTERNAL_DOMAIN)
+        host and not _is_internal_host(host)
         for host in (_host_of(url) for url in urls)
     ):
         return _Verdict(
