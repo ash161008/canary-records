@@ -1,4 +1,4 @@
-"""Stage 11 checks: the Claude agent adapter.
+"""Checks: the Claude agent adapter.
 
 Every test here uses a mocked client, so the suite makes no paid API call.
 The one real call lives in scripts/smoke_claude.py.
@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 from backend import agent_claude, config, database, seeder, sessions
 from scripts import generate_workspace as generator
 
-# Running Claude costs money, so the endpoint is admin-only (Stage 16).
+# Running Claude costs money, so the endpoint is admin-only.
 ADMIN_TOKEN = "claude-tests-admin-token"
 
 

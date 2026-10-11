@@ -1,4 +1,4 @@
-"""Stage 4 checks: workspace path safety.
+"""Checks: workspace path safety.
 
 Each test covers one way a path could escape the workspace.
 """

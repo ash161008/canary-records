@@ -106,7 +106,7 @@ def main() -> None:
     print("\nDone. No real email was sent; the rows above are the whole of it.")
     print(
         "\nNote: the workspace is left seeded, which is what the demo wants. "
-        "The Stage 4 tests read the real workspace and expect it unseeded, so "
+        "The workspace tests read the real workspace and expect it unseeded, so "
         "run this before the test suite:\n"
         "  .venv/bin/python -c 'from backend import seeder; seeder.unseed()'"
     )

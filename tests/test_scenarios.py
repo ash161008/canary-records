@@ -1,4 +1,4 @@
-"""Stage 13 checks: the scenario suite and the scoreboard.
+"""Checks: the scenario suite and the scoreboard.
 
 The metric tests build fake stored results and assert the arithmetic, so a
 counting mistake fails here rather than quietly misreporting a real run.

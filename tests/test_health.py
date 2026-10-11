@@ -1,4 +1,4 @@
-"""Stage 2 checks: the app starts, serves the API and serves the frontend."""
+"""Checks: the app starts, serves the API and serves the frontend."""
 
 from fastapi.testclient import TestClient
 

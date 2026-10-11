@@ -632,7 +632,7 @@ def save_conversation_state(session_id: str, state: dict | None) -> None:
 # ---------------------------------------------------------------------------
 # audit_events
 #
-# Hashing belongs to backend/audit.py (Stage 7). These helpers store and read
+# Hashing belongs to backend/audit.py. These helpers store and read
 # rows, taking previous_hash and event_hash as given.
 # ---------------------------------------------------------------------------
 
@@ -907,7 +907,7 @@ def update_email_status(
     """Record the outcome of an administrator decision.
 
     Whether a held email may be approved at all is decided by the gateway's
-    revalidation in Stage 9, not here.
+    revalidation, not here.
     """
     updates: dict = {"delivery_status": delivery_status}
     if rule is not None:

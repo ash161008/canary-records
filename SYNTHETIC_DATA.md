@@ -31,7 +31,7 @@ real source, and the script is the whole provenance of the data:
 | `inbox/normal_order_1042.json` | An invented ordinary customer enquiry |
 | `inbox/audit_request.html` | An invented enquiry carrying hidden injection instructions |
 
-Because generation is deterministic, Stage 5's `unseed()` restores the original
+Because generation is deterministic, The seeder's `unseed()` restores the original
 files by regenerating them rather than keeping a shadow copy. A test compares
 file hashes across runs to hold that property.
 

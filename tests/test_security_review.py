@@ -1,4 +1,4 @@
-"""Stage 16 regression tests: the findings from the security review.
+"""Regression tests: the findings from the security review.
 
 Each test pins one thing the review checked, so a later change cannot quietly
 undo it.

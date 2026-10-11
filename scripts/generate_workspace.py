@@ -5,7 +5,7 @@ employee, salary, supplier or API key anywhere in the output, and nothing was
 derived from a real dataset. See SYNTHETIC_DATA.md.
 
 The random seed is fixed at 42, so the workspace is byte-for-byte identical on
-every run. Stage 5's unseed() relies on that: it restores the original files by
+every run. The seeder's unseed() relies on that: it restores the original files by
 regenerating them rather than keeping a shadow copy.
 
 No NRIC or FIN numbers are produced, in full or in part. Staff are identified
@@ -47,7 +47,7 @@ REQUIRED_CUSTOMERS = (
 
 # ---------------------------------------------------------------------------
 # Name pools: the mix of Chinese, Malay, Indian and Eurasian names common in
-# Singapore. Decoy rows in Stage 5 are drawn from these same pools.
+# Singapore. Decoy rows are drawn from these same pools.
 # ---------------------------------------------------------------------------
 
 CHINESE_SURNAMES = (
@@ -300,7 +300,7 @@ def build_customers(rng: random.Random) -> list[dict]:
     """200 customer rows in no particular order.
 
     The file is deliberately unsorted and the ids are not sequential: it reads
-    like a CRM export. That is what lets Stage 5 insert decoy rows at random
+    like a CRM export. That is what lets the seeder insert decoy rows at random
     positions without their position or id giving them away.
     """
     names = make_names(rng, CUSTOMER_COUNT)
@@ -352,7 +352,7 @@ def build_orders(rng: random.Random, customers: list[dict]) -> list[dict]:
     """About 400 orders numbered from 1001, with gaps.
 
     The gaps matter: order numbers are not contiguous, the way a real sequence
-    is not after cancellations. Stage 5 can give a decoy customer orders drawn
+    is not after cancellations. The seeder can give a decoy customer orders drawn
     from those gaps, so decoy orders do not all cluster at the highest numbers.
     """
     numbers = {1042, 1043}
@@ -834,7 +834,7 @@ def main() -> None:
     print(f"Workspace written to {config.WORKSPACE_DIR} (seed {SEED})")
     for key, value in counts.items():
         print(f"  {key:<20} {value}")
-    print("\nAll records are synthetic. No canaries planted (that is Stage 5).")
+    print("\nAll records are synthetic. No canaries planted (the seeder does that).")
 
 
 if __name__ == "__main__":

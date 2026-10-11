@@ -1,4 +1,4 @@
-"""Stage 8 checks: CanaryGateway.
+"""Checks: CanaryGateway.
 
 One behaviour per test. Every test runs against a seeded workspace and
 databases in a temporary directory.

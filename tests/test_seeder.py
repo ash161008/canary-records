@@ -1,4 +1,4 @@
-"""Stage 5 checks: the decoy seeder.
+"""Checks: the decoy seeder.
 
 Every test runs against a workspace in a temporary directory, so the committed
 workspace is never seeded by the suite. The registry is already redirected to
@@ -428,7 +428,7 @@ def test_no_decoy_marker_anywhere_in_the_seeded_workspace(clean_workspace):
 
 
 def test_decoy_rows_pass_the_same_validators_as_real_rows(clean_workspace):
-    """The Stage 4 validators, applied to the 15 decoy rows specifically."""
+    """The workspace validators, applied to the 15 decoy rows specifically."""
     seeder.seed()
     rows = read_csv(seeder.CUSTOMERS_CSV)
 

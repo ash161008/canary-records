@@ -1,4 +1,4 @@
-"""Stage 3 checks: schema initialisation and CRUD for every table.
+"""Checks: schema initialisation and CRUD for every table.
 
 One behaviour per test.
 """
@@ -396,7 +396,7 @@ def test_audit_event_records_decision_fields_not_file_contents(run_id, session):
 
 
 def test_audit_event_can_append_inside_a_caller_transaction(run_id):
-    """Stage 7 appends inside one immediate transaction per event."""
+    """Each event is appended inside one immediate transaction."""
     with database.app_transaction() as connection:
         previous = database.get_last_audit_event(run_id, connection=connection)
         database.create_audit_event(

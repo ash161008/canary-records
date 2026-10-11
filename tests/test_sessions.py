@@ -1,4 +1,4 @@
-"""Stage 9 checks: sessions and administrator controls.
+"""Checks: sessions and administrator controls.
 
 One behaviour per test. Every test runs against a seeded workspace and
 databases in a temporary directory.

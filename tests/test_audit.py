@@ -1,7 +1,7 @@
-"""Stage 7 checks: the tamper-evident audit chain.
+"""Checks: the tamper-evident audit chain.
 
-One behaviour per test. The audit endpoints require the administrator token
-from Stage 9 onwards: the log holds references that are linkable to a person,
+One behaviour per test. The audit endpoints require the administrator token:
+the log holds references that are linkable to a person,
 so it is admin data in its own right.
 """
 

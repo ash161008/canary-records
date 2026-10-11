@@ -12,7 +12,7 @@ only when it stays inside ``workspace/``:
 * reads are capped at 1 MB.
 
 These functions make no access-control decision about *who* may read a folder.
-Role permissions belong to the gateway (Stage 8); this module only guarantees
+Role permissions belong to the gateway; this module only guarantees
 that a path cannot escape the workspace.
 
 The workspace root is read from ``config`` at call time, so tests can point it

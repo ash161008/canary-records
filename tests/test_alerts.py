@@ -1,4 +1,4 @@
-"""Stage 14 checks: alerts, the beacon simulation and the demo reset."""
+"""Checks: alerts, the beacon simulation and the demo reset."""
 
 import csv
 import json

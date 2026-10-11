@@ -1,12 +1,12 @@
-"""Scenario suite: loading.
+"""Scenario suite: loading, running and scoring.
 
-Stage 13 adds the measured suite itself - the 20 attacks and 15 normal tasks,
-the run matrix across agents and protection modes, the classification of every
-run and the scoreboard metrics.
+The measured suite is 20 attacks and 15 normal tasks, run across agents and
+protection modes, with every run classified and reduced to the scoreboard
+metrics.
 
-What exists now is the loader the scripted agent needs to replay a scenario:
-reading ``scenarios/attacks.json`` and ``scenarios/normal.json``, and finding
-one scenario by id. Those files are empty until Stage 13 fills them.
+This module also holds the loader the scripted agent needs to replay a
+scenario: reading ``scenarios/attacks.json`` and ``scenarios/normal.json``,
+and finding one scenario by id.
 
 A scenario is data, not code. ``intended_tool_calls`` describes what an
 attacker wants the agent to do; replaying it proves nothing about the agent and

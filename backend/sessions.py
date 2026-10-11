@@ -76,8 +76,8 @@ def list_inbox() -> list[dict]:
 def load_inbox_item(inbox_id: str) -> dict:
     """One inbox item, with the address it came from.
 
-    The raw body is returned unchanged, hidden HTML included: Stage 11 hands
-    it to the model wrapped as untrusted content, and security never depends
+    The raw body is returned unchanged, hidden HTML included: the agent
+    adapter hands it to the model wrapped as untrusted content, and security never depends
     on the model honouring that wrapper.
     """
     if not inbox_id or not re.fullmatch(r"[A-Za-z0-9_\-]{1,80}", inbox_id):

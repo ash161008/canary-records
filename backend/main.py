@@ -4,8 +4,9 @@ One app serves both the static frontend and the JSON API from the same
 origin, so the browser makes no cross-origin requests and no CORS
 configuration is needed.
 
-Stage 2 provides the skeleton and GET /api/health. The security system, the
-agent endpoints and the admin surface are added in later stages.
+The module holds the HTTP surface: the health check, the agent endpoints and
+the administrator endpoints. Every security decision belongs to
+backend/gateway.py, not here.
 """
 
 import logging
@@ -76,8 +77,7 @@ def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
 
     Fails closed: if ADMIN_TOKEN is not configured, no admin endpoint works.
     The token is compared with ``secrets.compare_digest`` and is never
-    returned, logged or echoed in an error. Stage 9 applies this to the rest
-    of the admin surface.
+    returned, logged or echoed in an error.
     """
     expected = config.ADMIN_TOKEN
     if not expected:
@@ -105,8 +105,7 @@ def health() -> dict:
 #
 # These are administrator endpoints, not agent tools. They are not in the
 # gateway's tool list, so no agent can reach seeding, unseeding or the decoy
-# map however it is prompted. The X-Admin-Token requirement is added in
-# Stage 9 along with the rest of the admin surface.
+# map however it is prompted. Each one requires the X-Admin-Token header.
 # ---------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-"""Stage 10 checks: the scripted agent.
+"""Checks: the scripted agent.
 
 Integration tests. Each one drives the gateway through the scripted agent and
 asserts on what the gateway did, never on what an agent chose to do - the

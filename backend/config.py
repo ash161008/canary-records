@@ -1,9 +1,9 @@
 """Configuration and filesystem layout for Canary Records.
 
 Reads settings from the environment (optionally via a .env file) and defines
-the directory layout. Role permissions and the outbound limits that the
-gateway enforces are added in Stage 8; this module holds no security
-decisions yet.
+the directory layout. The role permissions and outbound limits the gateway
+enforces are declared here; this module stores that policy and makes no
+decision itself.
 
 Secrets are read here and never logged, never sent to the browser, and never
 placed in a model prompt or an audit event.
@@ -29,20 +29,20 @@ APP_DB = DATA_DIR / "app.db"
 
 load_dotenv(BASE_DIR / ".env")
 
-# Server. Bound to loopback only (hardened further in Stage 9).
+# Server. Bound to loopback only.
 HOST = "127.0.0.1"
 PORT = int(os.getenv("PORT", "8000"))
 
-# Claude. The model id is never defaulted to a guess: Stage 11 validates
-# CLAUDE_MODEL against the live models list before any paid call.
+# Claude. The model id is never defaulted to a guess: CLAUDE_MODEL is
+# validated against the live models list before any paid call.
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "")
 
-# Admin surface and demo-only endpoints. Enforcement arrives in Stage 7/9.
+# Admin surface and demo-only endpoints. Enforced in backend/main.py.
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 DEMO_MODE = os.getenv("DEMO_MODE", "1") == "1"
 
-# Optional Telegram alert relay (Stage 14). Absent values disable it.
+# Optional Telegram alert relay. Absent values disable it.
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 

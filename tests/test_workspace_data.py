@@ -1,4 +1,4 @@
-"""Stage 4 checks: the generated workspace is correct, consistent and clean.
+"""Checks: the generated workspace is correct, consistent and clean.
 
 These tests read the real workspace/ tree, before any canary is planted.
 """
@@ -229,7 +229,7 @@ def test_order_fields_and_types(orders):
 
 
 def test_order_numbers_have_gaps(orders):
-    """Numbers are not contiguous, so Stage 5 can place decoy orders in the
+    """Numbers are not contiguous, so the seeder can place decoy orders in the
     gaps instead of clustering them at the highest numbers."""
     numbers = sorted(order["order_number"] for order in orders)
     assert numbers[-1] - numbers[0] + 1 > len(numbers)
@@ -312,7 +312,7 @@ def test_the_nric_pattern_itself_works():
 def test_record_files_contain_no_decoy_markers():
     """A decoy must never be labelled inside the data.
 
-    Checked against the record files, which is where Stage 5 plants decoys.
+    Checked against the record files, which is where the seeder plants decoys.
     The word "test" is not searched for as a substring because the reserved
     .test domain is required elsewhere in the project; marker words that would
     actually give a decoy away are searched for instead.
@@ -391,7 +391,7 @@ def test_normal_inbox_item_comes_from_the_order_owner(customers, orders):
 
 
 def test_integrations_file_has_two_api_keys_in_one_format():
-    """Stage 5 adds a third line in exactly this format."""
+    """The seeder adds a third line in exactly this format."""
     text = (config.WORKSPACE_DIR / "it" / "integrations.txt").read_text(
         encoding="utf-8"
     )
@@ -431,7 +431,7 @@ def test_all_expected_files_exist():
 
 
 def test_no_canary_file_exists_yet():
-    """Stage 5 creates the trade-secret decoy document, not Stage 4."""
+    """The seeder creates the trade-secret decoy document; generation does not."""
     assert not (
         config.WORKSPACE_DIR / "product_docs" / "supplier_terms_2026.txt"
     ).exists()
@@ -445,7 +445,7 @@ def test_no_canary_file_exists_yet():
 def test_generation_is_identical_on_every_run(tmp_path):
     """Seed 42 means the same bytes every time.
 
-    Stage 5's unseed() restores the originals by regenerating them, so this
+    The seeder's unseed() restores the originals by regenerating them, so this
     property is what makes that safe.
     """
     import hashlib

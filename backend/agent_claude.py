@@ -9,7 +9,7 @@ construction and the response parsing. Written against the installed
 answered with ``tool_result`` blocks carrying tool_use_id and content).
 
 **Sampling is left at its defaults.** No temperature, top_p or top_k is ever
-sent. Variability is measured by repeating runs (Stage 13), not tuned away.
+sent. Variability is measured by repeating runs in the suite, not tuned away.
 
 **Nothing here decides security.** Claude asks; ``CanaryGateway.execute()``
 decides. The incoming email is loaded by the backend and handed over wrapped

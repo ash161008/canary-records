@@ -1,4 +1,4 @@
-"""Stage 6 checks: the detector.
+"""Checks: the detector.
 
 Each test covers one behaviour. The seeded workspace lives in a temporary
 directory, so the committed workspace is never touched.
