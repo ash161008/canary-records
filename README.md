@@ -115,9 +115,21 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
-on the server. Open endpoints are `/api/health`, `/`, the static assets,
-`POST /api/sessions`, `GET /api/sessions/{id}`, `GET /api/workspace` (counts
-only) and `POST /api/audit/verify`. The server binds to loopback only.
+on the server. The server binds to loopback only.
+
+**What stays open, and why.** `/api/health`, `/`, the static assets,
+`/api/agents`, `/api/workspace` (counts only), `/api/runs`,
+`/api/suite/latest`, `/api/alerts` (which never carry contents),
+`/api/inbox` and `/api/scenarios` (synthetic fixtures), `POST /api/sessions`,
+`POST /api/run/scripted` (free and deterministic) and `POST /api/audit/verify`
+(deliberately open — see above). A test asserts no open endpoint returns a
+customer's phone number or address on file.
+
+Closed in the Stage 16 review: `POST /api/run/claude` and its resume, because
+each call spends money with the model provider; `GET /api/emails`, because a
+message body is record data — a held message keeps its body verbatim for
+review; and `GET /api/sessions/{id}`, because the task context names the
+customer's address on file.
 
 Admin endpoints are also not agent tools. An agent never makes an HTTP request
 at all: it runs in-process against `CanaryGateway.execute()`, so it cannot see

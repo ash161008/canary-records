@@ -14,6 +14,13 @@ from fastapi.testclient import TestClient
 from backend import agent_claude, config, database, seeder, sessions
 from scripts import generate_workspace as generator
 
+# Running Claude costs money, so the endpoint is admin-only (Stage 16).
+ADMIN_TOKEN = "claude-tests-admin-token"
+
+
+def admin(token=ADMIN_TOKEN):
+    return {"X-Admin-Token": token}
+
 
 # ---------------------------------------------------------------------------
 # A mock client shaped like the installed SDK's responses
@@ -77,6 +84,7 @@ def world(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "WORKSPACE_DIR", root)
     monkeypatch.setattr(config, "CLAUDE_MODEL", "claude-haiku-5-5")
     monkeypatch.setattr(config, "ANTHROPIC_API_KEY", "sk-ant-not-a-real-key")
+    monkeypatch.setattr(config, "ADMIN_TOKEN", ADMIN_TOKEN)
     generator.generate(root)
     seeder.seed()
     database.init_app_db()
@@ -799,7 +807,9 @@ def client(world):
 
 def test_the_endpoint_refuses_an_unknown_inbox_item(client):
     response = client.post(
-        "/api/run/claude", json={"inbox_id": "nope", "protection_mode": "protect"}
+        "/api/run/claude",
+        json={"inbox_id": "nope", "protection_mode": "protect"},
+        headers=admin(),
     )
 
     assert response.status_code in (404, 503)
@@ -813,6 +823,7 @@ def test_the_endpoint_rejects_an_unexpected_field(client):
             "protection_mode": "protect",
             "temperature": 0.9,
         },
+        headers=admin(),
     )
 
     assert response.status_code == 422
@@ -822,6 +833,7 @@ def test_the_endpoint_rejects_an_invalid_protection_mode(client):
     response = client.post(
         "/api/run/claude",
         json={"inbox_id": "normal_order_1042", "protection_mode": "none"},
+        headers=admin(),
     )
 
     assert response.status_code == 422
@@ -833,6 +845,7 @@ def test_the_endpoint_reports_a_missing_key_as_unavailable(client, monkeypatch):
     response = client.post(
         "/api/run/claude",
         json={"inbox_id": "normal_order_1042", "protection_mode": "protect"},
+        headers=admin(),
     )
 
     assert response.status_code == 503

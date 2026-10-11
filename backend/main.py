@@ -310,8 +310,13 @@ def create_session(request: CreateSessionRequest) -> dict:
     return sessions.describe(session.session_id)
 
 
-@app.get("/api/sessions/{session_id}")
+@app.get("/api/sessions/{session_id}", dependencies=[Depends(require_admin)])
 def get_session(session_id: str) -> dict:
+    """One session's state.
+
+    Admin-only: the task context names the customer's address on file, which
+    is a record value rather than a count.
+    """
     try:
         return sessions.describe(session_id)
     except ValueError as error:
@@ -421,12 +426,16 @@ class RunClaudeRequest(BaseModel):
     protection_mode: ProtectionMode
 
 
-@app.post("/api/run/claude")
+@app.post("/api/run/claude", dependencies=[Depends(require_admin)])
 def run_claude(request: RunClaudeRequest) -> dict:
     """Run the Claude agent once against one inbox item.
 
     The inbox item is loaded by the backend, not named by the model. Every
     tool the model asks for is executed by the gateway.
+
+    Admin-only, because every call to it spends money with the model
+    provider. Left open, anyone who could reach the loopback port could run
+    up a bill; the scripted agent stays open because it is free.
     """
     if bool(request.inbox_id) == bool(request.scenario_id):
         raise HTTPException(
@@ -457,7 +466,10 @@ def run_claude(request: RunClaudeRequest) -> dict:
         )
 
 
-@app.post("/api/run/claude/{session_id}/resume")
+@app.post(
+    "/api/run/claude/{session_id}/resume",
+    dependencies=[Depends(require_admin)],
+)
 def resume_claude(session_id: str) -> dict:
     """Carry on a session an administrator has continued.
 
@@ -612,7 +624,7 @@ def get_alerts(run_id: str | None = None, status: str | None = None) -> dict:
     return {"run_id": resolved, "count": len(listed), "alerts": listed}
 
 
-@app.get("/api/emails")
+@app.get("/api/emails", dependencies=[Depends(require_admin)])
 def get_emails(
     run_id: str | None = None,
     session_id: str | None = None,
@@ -620,6 +632,11 @@ def get_emails(
     limit: int = 20,
 ) -> dict:
     """Simulated messages, newest first.
+
+    Admin-only: a message body is record data. A held message keeps its body
+    verbatim so it can be reviewed, and a sent one carries whatever was sent,
+    so this returns personal data in a way the audit log deliberately does
+    not.
 
     ``external_only`` keeps just those addressed outside the company, which is
     what the attacker outbox shows. ``session_id`` narrows it to one run of

@@ -356,7 +356,7 @@ def test_an_unknown_inbox_item_returns_404(client):
 def test_getting_a_session_reports_its_state(client, world):
     session = session_for(world)
 
-    body = client.get(f"/api/sessions/{session.session_id}").json()
+    body = client.get(f"/api/sessions/{session.session_id}", headers=admin()).json()
 
     assert body["session_id"] == session.session_id
     assert body["status"] == "active"
@@ -364,7 +364,7 @@ def test_getting_a_session_reports_its_state(client, world):
 
 
 def test_getting_an_unknown_session_returns_404(client):
-    assert client.get("/api/sessions/nope").status_code == 404
+    assert client.get("/api/sessions/nope", headers=admin()).status_code == 404
 
 
 def test_the_protection_mode_cannot_be_changed_after_creation(client, world):
@@ -922,6 +922,7 @@ def test_the_outbox_is_scoped_to_one_session(client, world):
 
     body = client.get(
         "/api/emails",
+        headers=admin(),
         params={
             "external_only": True,
             "session_id": current.session_id,
@@ -941,6 +942,7 @@ def test_the_outbox_is_capped_at_twenty_rows(client, world):
 
     body = client.get(
         "/api/emails",
+        headers=admin(),
         params={
             "external_only": True,
             "limit": 20,
@@ -960,6 +962,7 @@ def test_the_outbox_reports_nothing_hidden_when_it_fits(client, world):
 
     body = client.get(
         "/api/emails",
+        headers=admin(),
         params={
             "external_only": True,
             "session_id": session.session_id,
@@ -977,6 +980,7 @@ def test_the_outbox_returns_the_newest_attempts_first(client, world):
 
     body = client.get(
         "/api/emails",
+        headers=admin(),
         params={
             "external_only": True,
             "session_id": session.session_id,
@@ -995,13 +999,13 @@ def test_the_limit_cannot_be_pushed_past_its_ceiling(client, world):
     session = session_for(world, mode="monitor")
     send_attempts(world, session, 3)
 
-    body = client.get("/api/emails", params={"limit": 5000}).json()
+    body = client.get("/api/emails", headers=admin(), params={"limit": 5000}).json()
 
     assert body["limit"] == 200
 
 
 def test_a_limit_of_zero_still_returns_something(client, world):
-    body = client.get("/api/emails", params={"limit": 0}).json()
+    body = client.get("/api/emails", headers=admin(), params={"limit": 0}).json()
 
     assert body["limit"] == 1
 
@@ -1013,7 +1017,9 @@ def test_an_unscoped_request_covers_the_whole_run(client, world):
     second = session_for(world, mode="monitor")
     send_attempts(world, second, 2, prefix="two")
 
-    body = client.get("/api/emails", params={"limit": 200, "run_id": world["run_id"]}).json()
+    body = client.get(
+        "/api/emails", headers=admin(), params={"limit": 200, "run_id": world["run_id"]}
+    ).json()
 
     assert body["count"] == 4
     assert body["earlier_in_run"] == 0

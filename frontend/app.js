@@ -513,7 +513,7 @@ async function runAgent() {
       const body = { protection_mode: protection };
       if (item.kind === "inbox") body.inbox_id = item.id;
       else body.scenario_id = item.id;
-      return api("/api/run/claude", { method: "POST", body });
+      return api("/api/run/claude", { method: "POST", admin: true, body });
     }
   );
   if (!outcome) return;
@@ -565,6 +565,7 @@ async function continueSession(sessionId) {
       () =>
         api(`/api/run/claude/${encodeURIComponent(sessionId)}/resume`, {
           method: "POST",
+          admin: true,
         })
     );
     if (outcome) {
@@ -641,7 +642,7 @@ async function loadOutbox() {
     if (state.session && state.session.session_id) {
       parameters.push(`session_id=${encodeURIComponent(state.session.session_id)}`);
     }
-    const data = await api(`/api/emails?${parameters.join("&")}`);
+    const data = await api(`/api/emails?${parameters.join("&")}`, { admin: true });
 
     if (!data.count) {
       placeholder(
@@ -701,7 +702,7 @@ async function loadAllMessages() {
   try {
     const runId = auditRunId();
     const query = runId ? `&run_id=${encodeURIComponent(runId)}` : "";
-    const data = await api(`/api/emails?limit=200${query}`);
+    const data = await api(`/api/emails?limit=200${query}`, { admin: true });
 
     if (!data.count) {
       const row = el("tr");
@@ -991,7 +992,9 @@ async function loadSessionPicker() {
       const option = document.createElement("option");
       option.value = sessionId;
       try {
-        const info = await api(`/api/sessions/${encodeURIComponent(sessionId)}`);
+        const info = await api(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+          admin: true,
+        });
         option.textContent = `${info.agent_label} · ${info.protection_mode} · ${info.status} · HR ${
           info.hr_access ? "on" : "off"
         }`;
