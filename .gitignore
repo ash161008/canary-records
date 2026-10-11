@@ -12,3 +12,6 @@ __pycache__/
 # Temporary layout-measurement harnesses (see tests/test_browser.py)
 frontend/_browser_check.html
 frontend/_measure.html
+
+# Internal build notes, not part of the submission
+docs/

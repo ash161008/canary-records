@@ -45,6 +45,9 @@ agent's tool paths cannot reach.
 
 ## Architecture
 
+<details>
+<summary><b>Architecture diagram</b> — click to expand</summary>
+
 ```mermaid
 flowchart TB
     subgraph outside["Outside the company"]
@@ -58,13 +61,8 @@ flowchart TB
     end
 
     subgraph gw["CanaryGateway.execute() — the only authority"]
-        direction TB
-        C1["1 known tool?"] --> C2["2 valid arguments?"]
-        C2 --> C3["3 session active?"]
-        C3 --> C4["4 path inside workspace?"]
-        C4 --> C5["5 role permitted?"]
-        C5 --> C6["6 run the tool"]
-        C6 --> C7["7 SCAN before returning"]
+        CHECKS["1 known tool? · 2 valid arguments? · 3 session active?<br/>4 path inside workspace? · 5 role permitted?"]
+        CHECKS --> C6["6 run the tool"] --> C7["7 SCAN before returning"]
     end
 
     subgraph data["Lim & Co Trading — synthetic"]
@@ -77,8 +75,8 @@ flowchart TB
     ADMIN["Administrator<br/>stop · continue · approve · deny"]
 
     EMAIL --> CLAUDE
-    CLAUDE -- "tool request" --> C1
-    SCRIPTED -- "replayed attack" --> C1
+    CLAUDE -- "tool request" --> CHECKS
+    SCRIPTED -- "replayed attack" --> CHECKS
     C6 <--> WS
     C7 <--> DET
     DET <-. "reads only here" .-> VAULT
@@ -87,7 +85,7 @@ flowchart TB
     C7 -- "blocked / held" --> ATTACKER
     gw --> APP
     APP --> ADMIN
-    ADMIN --> C3
+    ADMIN --> CHECKS
 
     classDef danger fill:#2a1512,stroke:#f0533f,color:#f0533f
     classDef safe fill:#10201a,stroke:#3fb950,color:#3fb950
@@ -96,6 +94,8 @@ flowchart TB
     class gw safe
     class VAULT,APP,WS store
 ```
+
+</details>
 
 The dotted line is the registry boundary: only `detector.py` and `seeder.py`
 may open `vault/registry.db`, and the path utilities an agent tool uses cannot
@@ -697,14 +697,13 @@ the gateway permits.
 - Anish Rao — anishrao147@gmail.com
 
 ### AI tools used during development
-  
-  - **Claude Opus 5 via Claude Code** — used as a development assistant in an
-    iterative workflow. The team defined the requirements, security principles
-    and implementation stages, then reviewed changes, investigated issues and ran
-    tests to validate the results.
-  - **Claude Haiku 5.5 via the Anthropic API** — powers the demo agent itself
-    (`backend/agent_claude.py`). This is part of the application, separate from
-    the tools used to develop it.
-  - **Testing and validation** — reported measurements are calculated from actual
-    code execution rather than estimates or model-generated claims.
-  
+
+- **Claude Opus 5 via Claude Code** — used as a development assistant in an
+  iterative workflow. The team defined the requirements, security principles
+  and implementation stages, then reviewed changes, investigated issues and ran
+  tests to validate the results.
+- **Claude Haiku 5.5 via the Anthropic API** — powers the demo agent itself
+  (`backend/agent_claude.py`). This is part of the application, separate from
+  the tools used to develop it.
+- **Testing and validation** — reported measurements are calculated from actual
+  code execution rather than estimates or model-generated claims.

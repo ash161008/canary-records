@@ -1,2 +1,0 @@
-cd ~/Desktop/canary-records
-mkdir -p results && pbpaste > results/claude_suite_raw_1430.txt
