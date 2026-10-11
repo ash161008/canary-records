@@ -290,6 +290,7 @@ CREATE TABLE IF NOT EXISTS test_results (
     unauthorised_disclosure INTEGER NOT NULL DEFAULT 0,
     canary_exposure         INTEGER NOT NULL DEFAULT 0,
     forbidden_access        INTEGER NOT NULL DEFAULT 0,
+    attempted_by_model      INTEGER NOT NULL DEFAULT 0,
     false_hold              INTEGER NOT NULL DEFAULT 0,
     task_failed             INTEGER NOT NULL DEFAULT 0,
     model_refused           INTEGER NOT NULL DEFAULT 0,
@@ -319,10 +320,37 @@ CREATE INDEX IF NOT EXISTS idx_canaries_status ON canaries(status);
 """
 
 
+# Columns added after a database may already exist. CREATE TABLE IF NOT
+# EXISTS will not add them, so each is applied once, by name.
+_APP_MIGRATIONS = (
+    (
+        "test_results",
+        "attempted_by_model",
+        "ALTER TABLE test_results ADD COLUMN attempted_by_model "
+        "INTEGER NOT NULL DEFAULT 0",
+    ),
+)
+
+
+def _apply_migrations(connection: sqlite3.Connection) -> None:
+    for table, column, statement in _APP_MIGRATIONS:
+        existing = {
+            row["name"] for row in connection.execute(f"PRAGMA table_info({table})")
+        }
+        if column not in existing:
+            connection.execute(statement)
+            logger.info("added %s.%s", table, column)
+
+
 def init_app_db() -> None:
-    """Create data/app.db and its tables if they do not exist."""
+    """Create data/app.db and its tables if they do not exist.
+
+    Idempotent, and it brings an older database up to date: a measure added
+    after the fact gets its column here rather than needing the file deleted.
+    """
     with app_connection() as connection:
         connection.executescript(_APP_SCHEMA)
+        _apply_migrations(connection)
     logger.info("app database ready at %s", config.APP_DB.name)
 
 
@@ -1003,6 +1031,7 @@ def create_test_result(
     unauthorised_disclosure: bool = False,
     canary_exposure: bool = False,
     forbidden_access: bool = False,
+    attempted_by_model: bool = False,
     false_hold: bool = False,
     task_failed: bool = False,
     model_refused: bool = False,
@@ -1014,9 +1043,10 @@ def create_test_result(
             "INSERT INTO test_results ("
             "run_id, scenario_id, scenario_type, category, repeat_index, "
             "expected, outcome, caught_at, unauthorised_disclosure, "
-            "canary_exposure, forbidden_access, false_hold, task_failed, "
-            "model_refused, details, duration_ms, created_at"
-            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "canary_exposure, forbidden_access, attempted_by_model, "
+            "false_hold, task_failed, model_refused, details, duration_ms, "
+            "created_at"
+            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 run_id,
                 scenario_id,
@@ -1029,6 +1059,7 @@ def create_test_result(
                 1 if unauthorised_disclosure else 0,
                 1 if canary_exposure else 0,
                 1 if forbidden_access else 0,
+                1 if attempted_by_model else 0,
                 1 if false_hold else 0,
                 1 if task_failed else 0,
                 1 if model_refused else 0,

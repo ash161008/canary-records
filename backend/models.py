@@ -154,6 +154,7 @@ class TestResult(_Row):
     unauthorised_disclosure: int = 0
     canary_exposure: int = 0
     forbidden_access: int = 0
+    attempted_by_model: int = 0
     false_hold: int = 0
     task_failed: int = 0
     model_refused: int = 0
