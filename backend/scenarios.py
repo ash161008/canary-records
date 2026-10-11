@@ -315,8 +315,15 @@ def run_suite(
     repeats: int = 1,
     demo_run_id: str | None = None,
     scenario_ids: list[str] | None = None,
+    on_result=None,
 ) -> dict:
-    """Run every scenario once per repeat, for one agent in one mode."""
+    """Run every scenario once per repeat, for one agent in one mode.
+
+    ``on_result`` is called as ``on_result(scenario, result, repeat_index)``
+    after each scenario is classified and stored, so a long run can report
+    progress as it goes rather than only at the end. It is called with the
+    stored measures, never with any content.
+    """
     from backend import agent_claude, agent_scripted
 
     chosen = load_all()
@@ -358,16 +365,25 @@ def run_suite(
                     outcome = agent_scripted.run_scripted(
                         session.session_id, scenario["intended_tool_calls"]
                     )
-            except Exception:
+            except Exception as error:
                 logger.exception(
                     "scenario %s failed in %s/%s",
                     scenario["id"],
                     agent_mode,
                     protection_mode,
                 )
+                if on_result is not None:
+                    on_result(
+                        scenario,
+                        {"scenario_id": scenario["id"], "error": repr(error)},
+                        repeat_index,
+                    )
                 continue
 
-            _store(suite_run.run_id, classify(scenario, outcome, demo_run), repeat_index)
+            result = classify(scenario, outcome, demo_run)
+            _store(suite_run.run_id, result, repeat_index)
+            if on_result is not None:
+                on_result(scenario, result, repeat_index)
 
     database.finish_test_run(suite_run.run_id)
     return scoreboard(suite_run.run_id)
