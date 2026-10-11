@@ -617,34 +617,121 @@ async function loadAlerts() {
   }
 }
 
+const OUTBOX_LIMIT = 20;
+
 async function loadOutbox() {
   const body = document.querySelector("#outbox-table tbody");
+  const footer = document.getElementById("outbox-footer");
   clear(body);
+  clear(footer);
+
+  const placeholder = (text) => {
+    const row = el("tr");
+    const cell = el("td", "empty", text);
+    cell.colSpan = 4;
+    row.appendChild(cell);
+    body.appendChild(row);
+  };
+
   try {
-    const query = state.runId ? `&run_id=${encodeURIComponent(state.runId)}` : "";
-    const data = await api(`/api/emails?external_only=true${query}`);
+    // Scoped to this run's session. A demo run accumulates every session's
+    // attempts, and listing all of them made this panel grow without bound.
+    const parameters = [`external_only=true`, `limit=${OUTBOX_LIMIT}`];
+    if (state.runId) parameters.push(`run_id=${encodeURIComponent(state.runId)}`);
+    if (state.session && state.session.session_id) {
+      parameters.push(`session_id=${encodeURIComponent(state.session.session_id)}`);
+    }
+    const data = await api(`/api/emails?${parameters.join("&")}`);
+
+    if (!data.count) {
+      placeholder(
+        state.session
+          ? "This run addressed nothing outside the company."
+          : "Run an agent to see what it tried to send."
+      );
+    } else {
+      data.emails.forEach((email) => {
+        const row = el("tr");
+        row.dataset.decision = email.delivery_status;
+        row.appendChild(el("td", "mono", email.recipient));
+        row.appendChild(el("td", null, email.subject));
+        const status = el("td");
+        status.appendChild(badge(email.delivery_status));
+        row.appendChild(status);
+        row.appendChild(el("td", "mono", email.rule || ""));
+        body.appendChild(row);
+      });
+    }
+
+    // Say what is not being shown, and where the rest is.
+    const notes = [];
+    if (data.truncated) {
+      notes.push(
+        `Showing the ${data.count} most recent of ${data.total_in_scope} attempts in this session.`
+      );
+    }
+    if (data.earlier_in_run) {
+      notes.push(
+        `${data.earlier_in_run} earlier attempt${data.earlier_in_run === 1 ? "" : "s"} in this run ${
+          data.earlier_in_run === 1 ? "is" : "are"
+        } not shown here.`
+      );
+    }
+    if (notes.length) {
+      footer.appendChild(el("span", null, notes.join(" ")));
+      const link = el("button", "btn btn-small", "See the full list on screen 4");
+      link.addEventListener("click", () => {
+        showScreen("audit");
+        document.getElementById("all-messages-panel").scrollIntoView({ block: "start" });
+      });
+      footer.appendChild(link);
+    }
+  } catch (error) {
+    placeholder(error.message);
+  }
+}
+
+/** Screen 4: every message in the run, which is what that link points at. */
+async function loadAllMessages() {
+  const body = document.querySelector("#messages-table tbody");
+  clear(body);
+  const countLine = document.getElementById("messages-count");
+  countLine.textContent = "";
+
+  try {
+    const runId = auditRunId();
+    const query = runId ? `&run_id=${encodeURIComponent(runId)}` : "";
+    const data = await api(`/api/emails?limit=200${query}`);
+
     if (!data.count) {
       const row = el("tr");
-      const cell = el("td", "empty", "Nothing was addressed outside the company.");
-      cell.colSpan = 4;
+      const cell = el("td", "empty", "This run produced no messages.");
+      cell.colSpan = 5;
       row.appendChild(cell);
       body.appendChild(row);
       return;
     }
+
     data.emails.forEach((email) => {
       const row = el("tr");
+      row.dataset.decision = email.delivery_status;
       row.appendChild(el("td", "mono", email.recipient));
       row.appendChild(el("td", null, email.subject));
       const status = el("td");
       status.appendChild(badge(email.delivery_status));
       row.appendChild(status);
       row.appendChild(el("td", "mono", email.rule || ""));
+      row.appendChild(el("td", "mono", (email.created_at || "").slice(11, 23)));
       body.appendChild(row);
     });
+
+    countLine.textContent = data.truncated
+      ? `Showing the ${data.count} most recent of ${data.total_in_scope} messages in this run.`
+      : `${data.count} message${data.count === 1 ? "" : "s"} in this run.`;
   } catch (error) {
     const row = el("tr");
     const cell = el("td", "empty", error.message);
-    cell.colSpan = 4;
+    cell.colSpan = 5;
     row.appendChild(cell);
     body.appendChild(row);
   }
@@ -661,7 +748,12 @@ async function resolveAlert(alertId) {
 
 async function loadAudit() {
   await loadRuns();
-  await Promise.all([loadAuditTable(), loadHeld(), loadSessionPicker()]);
+  await Promise.all([
+    loadAuditTable(),
+    loadHeld(),
+    loadAllMessages(),
+    loadSessionPicker(),
+  ]);
 }
 
 async function loadRuns() {
@@ -1143,6 +1235,7 @@ function init() {
     state.runId = auditRunId();
     loadAuditTable();
     loadHeld();
+    loadAllMessages();
     loadSessionPicker();
   });
   document.getElementById("verify-button").addEventListener("click", verifyChain);
@@ -1151,6 +1244,9 @@ function init() {
   document.getElementById("reset-button").addEventListener("click", resetDemo);
   document.getElementById("refresh-audit").addEventListener("click", () => loadAuditTable());
   document.getElementById("refresh-held").addEventListener("click", loadHeld);
+  document
+    .getElementById("refresh-messages")
+    .addEventListener("click", loadAllMessages);
   document.getElementById("hr-grant").addEventListener("click", () => setHrAccess(true));
   document.getElementById("hr-remove").addEventListener("click", () => setHrAccess(false));
 

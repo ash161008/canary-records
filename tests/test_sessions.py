@@ -893,3 +893,128 @@ def test_the_audit_chain_stays_valid_across_admin_actions(client, world):
     client.post(f"/api/sessions/{session.session_id}/stop", headers=admin())
 
     assert audit.verify_audit_chain(world["run_id"])["valid"] is True
+
+
+# ---------------------------------------------------------------------------
+# The attacker outbox is scoped and capped
+# ---------------------------------------------------------------------------
+
+
+def send_attempts(world, session, count, prefix="attempt"):
+    for index in range(count):
+        gateway.execute(
+            session.session_id,
+            "send_email",
+            {
+                "recipient": f"{prefix}{index}@crm-switch.test",
+                "subject": f"{prefix} {index}",
+                "body": "nothing personal here",
+            },
+        )
+
+
+def test_the_outbox_is_scoped_to_one_session(client, world):
+    """A demo run accumulates every session's attempts; the panel shows one."""
+    earlier = session_for(world, mode="monitor")
+    send_attempts(world, earlier, 3, prefix="old")
+    current = session_for(world, mode="monitor")
+    send_attempts(world, current, 4)
+
+    body = client.get(
+        "/api/emails",
+        params={
+            "external_only": True,
+            "session_id": current.session_id,
+            "run_id": world["run_id"],
+        },
+    ).json()
+
+    assert body["count"] == 4
+    assert body["total_in_scope"] == 4
+    assert body["total_in_run"] == 7
+    assert body["earlier_in_run"] == 3
+
+
+def test_the_outbox_is_capped_at_twenty_rows(client, world):
+    session = session_for(world, mode="monitor")
+    send_attempts(world, session, 25)
+
+    body = client.get(
+        "/api/emails",
+        params={
+            "external_only": True,
+            "limit": 20,
+            "session_id": session.session_id,
+            "run_id": world["run_id"],
+        },
+    ).json()
+
+    assert body["count"] == 20
+    assert body["total_in_scope"] == 25
+    assert body["truncated"] is True
+
+
+def test_the_outbox_reports_nothing_hidden_when_it_fits(client, world):
+    session = session_for(world, mode="monitor")
+    send_attempts(world, session, 2)
+
+    body = client.get(
+        "/api/emails",
+        params={
+            "external_only": True,
+            "session_id": session.session_id,
+            "run_id": world["run_id"],
+        },
+    ).json()
+
+    assert body["truncated"] is False
+    assert body["earlier_in_run"] == 0
+
+
+def test_the_outbox_returns_the_newest_attempts_first(client, world):
+    session = session_for(world, mode="monitor")
+    send_attempts(world, session, 3)
+
+    body = client.get(
+        "/api/emails",
+        params={
+            "external_only": True,
+            "session_id": session.session_id,
+            "run_id": world["run_id"],
+        },
+    ).json()
+
+    assert [email["subject"] for email in body["emails"]] == [
+        "attempt 2",
+        "attempt 1",
+        "attempt 0",
+    ]
+
+
+def test_the_limit_cannot_be_pushed_past_its_ceiling(client, world):
+    session = session_for(world, mode="monitor")
+    send_attempts(world, session, 3)
+
+    body = client.get("/api/emails", params={"limit": 5000}).json()
+
+    assert body["limit"] == 200
+
+
+def test_a_limit_of_zero_still_returns_something(client, world):
+    body = client.get("/api/emails", params={"limit": 0}).json()
+
+    assert body["limit"] == 1
+
+
+def test_an_unscoped_request_covers_the_whole_run(client, world):
+    """What the full list on screen 4 asks for."""
+    first = session_for(world, mode="monitor")
+    send_attempts(world, first, 2, prefix="one")
+    second = session_for(world, mode="monitor")
+    send_attempts(world, second, 2, prefix="two")
+
+    body = client.get("/api/emails", params={"limit": 200, "run_id": world["run_id"]}).json()
+
+    assert body["count"] == 4
+    assert body["earlier_in_run"] == 0
+    assert body["session_id"] is None

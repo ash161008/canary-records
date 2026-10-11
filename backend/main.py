@@ -613,29 +613,58 @@ def get_alerts(run_id: str | None = None, status: str | None = None) -> dict:
 
 
 @app.get("/api/emails")
-def get_emails(run_id: str | None = None, external_only: bool = False) -> dict:
-    """Simulated messages for a run.
+def get_emails(
+    run_id: str | None = None,
+    session_id: str | None = None,
+    external_only: bool = False,
+    limit: int = 20,
+) -> dict:
+    """Simulated messages, newest first.
 
-    ``external_only`` keeps just those addressed outside the company, which
-    is what the attacker outbox shows.
+    ``external_only`` keeps just those addressed outside the company, which is
+    what the attacker outbox shows. ``session_id`` narrows it to one run of
+    one agent, which is what that panel wants: a demo run accumulates every
+    session's attempts, and showing all of them made the page grow without
+    bound.
+
+    The counts are worked out here so the interface can say how much it is not
+    showing without doing arithmetic of its own.
     """
     resolved = _resolve_run_id(run_id)
-    emails = database.list_simulated_emails(run_id=resolved)
+    capped = max(1, min(limit, 200))
+
+    in_run = database.list_simulated_emails(run_id=resolved)
     if external_only:
-        emails = [
+        in_run = [
             email
-            for email in emails
+            for email in in_run
             if not config.is_internal_recipient(email.recipient)
         ]
+
+    in_scope = (
+        [email for email in in_run if email.session_id == session_id]
+        if session_id
+        else in_run
+    )
+    shown = in_scope[:capped]
+
     return {
         "run_id": resolved,
-        "count": len(emails),
+        "session_id": session_id,
+        "count": len(shown),
+        "total_in_scope": len(in_scope),
+        "total_in_run": len(in_run),
+        # Attempts from this run that this panel is not showing, because they
+        # belong to earlier sessions.
+        "earlier_in_run": len(in_run) - len(in_scope),
+        "truncated": len(in_scope) > len(shown),
+        "limit": capped,
         "emails": [
             {
                 **email.model_dump(),
                 "internal": config.is_internal_recipient(email.recipient),
             }
-            for email in emails
+            for email in shown
         ],
     }
 

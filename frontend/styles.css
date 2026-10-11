@@ -569,3 +569,10 @@ h1 {
   font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--text-dim);
 }
+
+/* The outbox says what it is not showing, and where the rest is. */
+.outbox-footer {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 12px 0 0; font-size: 13px; color: var(--text-faint);
+}
+.outbox-footer:empty { display: none; }

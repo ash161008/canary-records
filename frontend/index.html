@@ -227,6 +227,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <p class="outbox-footer" id="outbox-footer"></p>
     </div>
   </section>
 
@@ -302,6 +303,27 @@
         </div>
       </div>
       <p class="status" id="hr-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="panel" id="all-messages-panel">
+      <div class="panel-head">
+        <h2 class="panel-title">All simulated messages in this run</h2>
+        <button class="btn btn-small" id="refresh-messages">Refresh</button>
+      </div>
+      <p class="stage-note">
+        Every outgoing message this run produced, newest first. Nothing was
+        ever sent; each row is the whole of the attempt.
+      </p>
+      <div class="table-scroll">
+        <table class="data-table" id="messages-table">
+          <thead>
+            <tr><th>Recipient</th><th>Subject</th><th>Status</th>
+                <th>Rule</th><th>Recorded</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="meta" id="messages-count"></p>
     </div>
 
     <div class="panel">
