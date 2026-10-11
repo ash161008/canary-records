@@ -27,13 +27,6 @@ logger = logging.getLogger(__name__)
 
 TELEGRAM_TIMEOUT_SECONDS = 5
 
-# What an administrator can do about an alert, given the session's state.
-_ACTIONS_BY_STATUS = {
-    "paused": ["stop", "continue"],
-    "active": ["stop"],
-}
-
-
 # ---------------------------------------------------------------------------
 # The optional Telegram relay
 # ---------------------------------------------------------------------------
@@ -244,7 +237,7 @@ def describe(alert: Alert) -> dict:
             config.agent_label(session.agent_mode) if session else None
         ),
         "session_status": session.status if session else None,
-        "actions": _ACTIONS_BY_STATUS.get(session.status, []) if session else [],
+        "actions": config.admin_actions(session.status) if session else [],
         "simulated": True,
     }
 

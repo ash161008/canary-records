@@ -95,6 +95,23 @@ def agent_label(agent_mode: str) -> str:
     return AGENT_LABELS.get(agent_mode, agent_mode)
 
 
+# What an administrator can do about a session, given its state. Kept here, in
+# one place, because three callers need it - the alert panel, and both agents'
+# run results - and they must not disagree: if one of them forgets, a paused
+# session offers no way out of the pause.
+ADMIN_ACTIONS_BY_STATUS = {
+    "paused": ("stop", "continue"),
+    "active": ("stop",),
+    "terminated": (),
+    "completed": (),
+}
+
+
+def admin_actions(status: str | None) -> list[str]:
+    """The admin actions a session in this state allows."""
+    return list(ADMIN_ACTIONS_BY_STATUS.get(status or "", ()))
+
+
 def role_permissions(role: str) -> dict:
     """The folder permissions for a role.
 

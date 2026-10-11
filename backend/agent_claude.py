@@ -372,13 +372,7 @@ def _outcome(
 
 def _admin_options(session: AgentSession | None) -> list[str]:
     """What an administrator can do next, decided from the session state."""
-    if session is None:
-        return []
-    if session.status == "paused":
-        return ["stop", "continue"]
-    if session.status == "active":
-        return ["stop"]
-    return []
+    return config.admin_actions(session.status if session else None)
 
 
 def _run_loop(
