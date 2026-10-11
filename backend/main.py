@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend import (
     __version__,
+    agent_claude,
     agent_scripted,
     audit,
     config,
@@ -385,3 +386,48 @@ def run_scripted(request: RunScriptedRequest) -> dict:
         raise HTTPException(
             status_code=500, detail="The scripted run failed; see server log."
         )
+
+
+class RunClaudeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    inbox_id: str = Field(min_length=1, max_length=80)
+    protection_mode: ProtectionMode
+
+
+@app.post("/api/run/claude")
+def run_claude(request: RunClaudeRequest) -> dict:
+    """Run the Claude agent once against one inbox item.
+
+    The inbox item is loaded by the backend, not named by the model. Every
+    tool the model asks for is executed by the gateway.
+    """
+    try:
+        return agent_claude.run_claude(
+            inbox_id=request.inbox_id,
+            protection_mode=request.protection_mode,
+        )
+    except agent_claude.ClaudeNotConfigured as error:
+        raise HTTPException(status_code=503, detail=str(error))
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+    except Exception:
+        logger.exception("Claude run failed")
+        raise HTTPException(
+            status_code=500, detail="The agent run failed; see server log."
+        )
+
+
+@app.post("/api/run/claude/{session_id}/resume")
+def resume_claude(session_id: str) -> dict:
+    """Carry on a session an administrator has continued.
+
+    The pending tool call is answered with the refusal. The withheld content
+    is not in the saved state, so there is nothing to release.
+    """
+    try:
+        return agent_claude.resume_claude(session_id)
+    except agent_claude.ClaudeNotConfigured as error:
+        raise HTTPException(status_code=503, detail=str(error))
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))

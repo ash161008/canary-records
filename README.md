@@ -25,14 +25,14 @@ prompt, and nothing is decided in the browser.
 
 ## Status
 
-This repository is being built in stages. **Stage 10 of 18 is complete**: the
+This repository is being built in stages. **Stage 11 of 18 is complete**: the
 project skeleton, the five-screen frontend shell, the health endpoint, the
 SQLite data layer, Lim & Co's synthetic workspace with its safe path utilities,
 the decoy seeder, the detector, the tamper-evident audit log, the gateway
-itself, sessions with their administrator controls, and the scripted agent.
-The Claude agent and the scenario suite are added in later stages, and the
-sections below will grow with them. Nothing in this README describes behaviour
-that does not yet run.
+itself, sessions with their administrator controls, the scripted agent, and the
+Claude agent. The five screens and the scenario suite are added in later
+stages, and the sections below will grow with them. Nothing in this README
+describes behaviour that does not yet run.
 
 Regenerate the workspace at any time with
 `.venv/bin/python scripts/generate_workspace.py` — it is deterministic (seed 42)
@@ -98,6 +98,8 @@ Then open <http://127.0.0.1:8000>. The server binds to loopback only.
 | `POST` | `/api/emails/{id}/approve` | Approve a held message; the gateway revalidates first. Admin. |
 | `POST` | `/api/emails/{id}/deny` | Deny a held message. Admin. |
 | `POST` | `/api/run/scripted` | Replay a scenario's intended tool calls through the gateway. |
+| `POST` | `/api/run/claude` | Run the Claude agent once against one inbox item. |
+| `POST` | `/api/run/claude/{id}/resume` | Carry on after an administrator's Continue. |
 
 Every admin endpoint requires the `X-Admin-Token` header, compared with
 `secrets.compare_digest`, and fails closed with 503 if `ADMIN_TOKEN` is unset
@@ -241,8 +243,24 @@ authorised, and nothing in the gateway can tell the difference.
 
 ### The two agents
 
-**Claude** is the demo agent (Stage 11). It decides what to request, and the
-gateway decides what happens.
+**Claude** is the demo agent. It decides what to request, and the gateway
+decides what happens. All provider code lives in `backend/agent_claude.py` —
+a test asserts no other module imports the SDK. Sampling is left at its
+defaults: no `temperature`, `top_p` or `top_k` is ever sent, and variability
+is measured by repeating runs instead. The model id and SDK version are logged
+for every run and returned with every result.
+
+The incoming email is loaded by the backend and handed to the model wrapped in
+an `<untrusted_email from='…'>` element, hidden HTML included. That wrapper is
+a courtesy to the model, not a control: if Claude ignores it entirely, every
+tool request it makes is still checked by the gateway, which never read the
+email. No security rule appears in the system prompt or in any tool
+description, and tests assert that stays true.
+
+One real API call lives in `scripts/smoke_claude.py`. It lists the available
+models first and stops with a clear message if `CLAUDE_MODEL` is not among
+them, rather than guessing. It leaves the workspace seeded, so unseed before
+running the test suite — the script says so when it finishes.
 
 **"Worst-case (scripted)"** is not an agent that decides anything. For an
 attack scenario it replays exactly the tool calls the attacker wanted, in
